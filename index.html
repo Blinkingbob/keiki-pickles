@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keiki Pickles — Business Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --forest: #1B4332;
+  --pine:   #2D6A4F;
+  --sage:   #52B788;
+  --mint:   #D8F3DC;
+  --cream:  #FAFAF7;
+  --white:  #FFFFFF;
+  --ink:    #111827;
+  --stone:  #6B7280;
+  --border: #E8E8E4;
+  --gold:   #C8941A;
+  --red:    #DC2626;
+  --blue:   #2563EB;
+  --light:  #F4F4F0;
+  --r: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); line-height: 1.5; }
+.mono { font-family: 'DM Mono', monospace; }
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--forest);
+  display: flex; align-items: center;
+  padding: 0; height: 48px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 0 rgba(255,255,255,.08);
+  overflow: hidden;
+}
+.topbar-brand { font-family: 'Playfair Display', serif; color: #fff; font-size: 14px; letter-spacing: .01em; padding: 0 16px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,.12); white-space: nowrap; }
+.topbar-brand em { color: var(--sage); font-style: normal; }
+.topbar-nav { display: flex; gap: 0; flex: 1; overflow-x: auto; scrollbar-width: none; }
+.topbar-nav::-webkit-scrollbar { display: none; }
+.tn { padding: 0 14px; height: 48px; display: flex; align-items: center; color: rgba(255,255,255,.55); font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; white-space: nowrap; border-bottom: 2px solid transparent; }
+.tn:hover { color: #fff; background: rgba(255,255,255,.06); }
+.tn.on { color: #fff; border-bottom-color: var(--sage); }
+.topbar-right { display: flex; align-items: center; gap: 8px; padding: 0 16px; flex-shrink: 0; border-left: 1px solid rgba(255,255,255,.12); }
+
+/* ── SIZE TOGGLE ── */
+.size-toggle { display: flex; background: rgba(255,255,255,.1); border-radius: 6px; padding: 2px; }
+.sz-btn { padding: 4px 14px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; color: rgba(255,255,255,.6); transition: all .15s; white-space: nowrap; }
+.sz-btn.on { background: var(--sage); color: #fff; }
+
+/* ── CONTROL PANEL ── */
+.ctrl { background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 48px; z-index: 90; }
+.ctrl-bar { max-width: 1440px; margin: 0 auto; display: flex; align-items: center; padding: 0 20px; gap: 0; min-height: 42px; }
+.ctrl-toggle { display: flex; align-items: center; gap: 6px; padding: 10px 14px 10px 0; border-right: 1px solid var(--border); cursor: pointer; flex-shrink: 0; user-select: none; }
+.ctrl-toggle-label { font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: .06em; }
+.ctrl-chevron { font-size: 10px; color: var(--stone); transition: transform .2s; }
+.ctrl-chevron.open { transform: rotate(180deg); }
+.ctrl-pills { display: flex; gap: 5px; flex: 1; overflow-x: auto; scrollbar-width: none; padding: 0 12px; }
+.ctrl-pills::-webkit-scrollbar { display: none; }
+.pill { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 20px; background: var(--light); color: var(--stone); border: 1px solid var(--border); white-space: nowrap; transition: all .15s; flex-shrink: 0; }
+.pill.changed { background: var(--mint); color: var(--forest); border-color: var(--sage); }
+.ctrl-reset { font-size: 11px; font-weight: 500; color: var(--stone); cursor: pointer; padding: 4px 10px; border: 1px solid var(--border); border-radius: 5px; background: transparent; flex-shrink: 0; transition: all .15s; margin-left: 8px; }
+.ctrl-reset:hover { color: var(--ink); border-color: var(--stone); }
+
+.ctrl-panel { display: none; border-top: 1px solid var(--border); background: #fff; }
+.ctrl-panel.open { display: block; }
+.ctrl-inner { max-width: 1440px; margin: 0 auto; padding: 20px 28px 24px; }
+.ctrl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px 32px; }
+.sl-item { }
+.sl-label { font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: baseline; }
+.sl-val { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--forest); }
+.sl-sub { font-size: 10px; color: var(--stone); margin-bottom: 6px; }
+input[type=range] { width: 100%; accent-color: var(--sage); cursor: pointer; height: 3px; }
+.ctrl-footer { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--stone); }
+
+/* ── PAGES ── */
+.page { display: none; max-width: 1440px; margin: 0 auto; padding: 24px 24px 60px; }
+.page.on { display: block; }
+
+/* ── SECTION HEADER ── */
+.sec { margin-bottom: 24px; }
+.sec h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--ink); margin-bottom: 4px; }
+.sec p { font-size: 13px; color: var(--stone); max-width: 600px; }
+
+/* ── GRID ── */
+.g2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.g3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.g4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+
+/* ── CARD ── */
+.card { background: #fff; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.card-head { padding: 14px 18px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-head h3 { font-size: 12px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: .06em; }
+.card-head .badge { font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+.bg { background: var(--mint); color: var(--forest); }
+.bo { background: #FEF3C7; color: #92400E; }
+.bb { background: #DBEAFE; color: var(--blue); }
+.br { background: #FEE2E2; color: var(--red); }
+.card-body { padding: 16px 18px; }
+
+/* ── STAT ── */
+.stat { padding: 18px; background: #fff; border: 1px solid var(--border); border-radius: var(--r); }
+.stat-val { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; color: var(--ink); line-height: 1; }
+.stat-val.g { color: var(--forest); }
+.stat-val.o { color: var(--gold); }
+.stat-val.r { color: var(--red); }
+.stat-val.b { color: var(--blue); }
+.stat-label { font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: .05em; margin-top: 6px; }
+.stat-sub { font-size: 11px; color: var(--stone); margin-top: 3px; font-style: italic; }
+
+/* ── TABLE ── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tbl th { font-size: 10px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: .06em; padding: 8px 12px; text-align: left; border-bottom: 2px solid var(--border); }
+.tbl th.r { text-align: right; }
+.tbl td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--ink); vertical-align: middle; }
+.tbl td.r { text-align: right; font-family: 'DM Mono', monospace; font-size: 11px; }
+.tbl td.c { text-align: center; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr.hi td { background: #FFFBEB; }
+.tbl tr.tot td { background: var(--mint); font-weight: 600; color: var(--forest); }
+.tbl tr:hover td { background: var(--light); }
+.tbl tr.hi:hover td { background: #FEF3C7; }
+
+/* ── FLOW ── */
+.flow { display: flex; gap: 1px; align-items: stretch; margin: 14px 0; }
+.fb { flex: 1; padding: 12px 10px; text-align: center; background: var(--light); border-radius: 2px; }
+.fb:first-child { border-radius: 6px 2px 2px 6px; background: var(--mint); }
+.fb:last-child { border-radius: 2px 6px 6px 2px; background: var(--forest); }
+.fb-val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--ink); }
+.fb:first-child .fb-val { color: var(--forest); }
+.fb.neg .fb-val { color: var(--red); }
+.fb:last-child .fb-val { color: var(--sage); }
+.fb-lbl { font-size: 10px; color: var(--stone); margin-top: 4px; }
+.fb:last-child .fb-lbl { color: rgba(255,255,255,.5); }
+
+/* ── CALLOUT ── */
+.co { border-radius: 6px; padding: 12px 14px; font-size: 12px; line-height: 1.7; margin: 10px 0; }
+.co-g { background: var(--mint); border-left: 3px solid var(--sage); }
+.co-o { background: #FEF3C7; border-left: 3px solid var(--gold); }
+.co-r { background: #FEE2E2; border-left: 3px solid var(--red); }
+
+/* ── BAR VISUAL ── */
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.bar-lbl { width: 160px; font-size: 11px; color: var(--ink); text-align: right; flex-shrink: 0; }
+.bar-track { flex: 1; height: 18px; background: var(--light); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; display: flex; align-items: center; padding-left: 7px; font-size: 10px; font-weight: 600; color: #fff; font-family: 'DM Mono', monospace; }
+.bar-end { width: 64px; font-size: 11px; font-weight: 600; color: var(--ink); font-family: 'DM Mono', monospace; }
+
+/* ── CHART ── */
+.cw { position: relative; }
+.h160 { height: 160px; } .h220 { height: 220px; } .h280 { height: 280px; } .h320 { height: 320px; }
+
+/* ── PHASE STEPPER ── */
+.stepper { display: flex; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 16px; }
+.step { flex: 1; padding: 10px 12px; text-align: center; cursor: pointer; border-right: 1px solid var(--border); background: var(--light); font-size: 12px; font-weight: 500; color: var(--stone); transition: all .15s; }
+.step:last-child { border-right: none; }
+.step:hover { background: var(--mint); color: var(--forest); }
+.step.on { background: var(--forest); color: #fff; }
+.step strong { display: block; font-size: 15px; font-family: 'DM Mono', monospace; }
+
+/* ── RISK ── */
+.risk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.rc { border-radius: 6px; padding: 10px 12px; cursor: pointer; border: 1px solid transparent; transition: all .15s; }
+.rc:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.rc .rt { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+.rc .rs { font-size: 10px; opacity: .7; }
+.rh { background: #FEE2E2; border-color: #FCA5A5; }
+.rm { background: #FEF3C7; border-color: #FCD34D; }
+.rl { background: var(--mint); border-color: #86EFAC; }
+
+/* ── CHECKLIST ── */
+.cl-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.cl-item:last-child { border-bottom: none; }
+.cl-item input { width: 15px; height: 15px; accent-color: var(--sage); flex-shrink: 0; margin-top: 2px; cursor: pointer; }
+.cl-item label { cursor: pointer; flex: 1; }
+.cl-item label strong { font-size: 12px; display: block; }
+.cl-item label span { font-size: 11px; color: var(--stone); }
+.cl-item.done label strong { text-decoration: line-through; color: var(--stone); }
+.prog { height: 4px; background: var(--light); border-radius: 2px; overflow: hidden; margin: 10px 0; }
+.prog-fill { height: 100%; background: var(--sage); border-radius: 2px; transition: width .3s; }
+.tag { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+.tg { background: var(--mint); color: var(--forest); }
+.to { background: #FEF3C7; color: #92400E; }
+.tb { background: #DBEAFE; color: var(--blue); }
+.tr { background: #FEE2E2; color: var(--red); }
+
+/* ── COMP TABLE ── */
+.comp-local { border-left: 3px solid var(--sage); }
+.comp-mainland { border-left: 3px solid var(--stone); }
+
+/* ── DIVIDER ── */
+.div { height: 1px; background: var(--border); margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">🥒 Hawaii Farming <em>Keiki Pickles</em></div>
+  <div class="topbar-nav">
+    <div class="tn on" onclick="nav('overview',this)">Overview</div>
+    <div class="tn" onclick="nav('economics',this)">Economics</div>
+    <div class="tn" onclick="nav('competitive',this)">Competitive</div>
+    <div class="tn" onclick="nav('phases',this)">Growth Plan</div>
+    <div class="tn" onclick="nav('pnl',this)">P&amp;L</div>
+    <div class="tn" onclick="nav('risks',this)">Risks</div>
+    <div class="tn" onclick="nav('checklist',this)">Checklist</div>
+  </div>
+  <div class="topbar-right">
+    <div class="size-toggle">
+      <div class="sz-btn on" onclick="setSize(12,this)">12 oz</div>
+      <div class="sz-btn" onclick="setSize(16,this)">16 oz</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROL PANEL -->
+<div class="ctrl">
+  <div class="ctrl-bar">
+    <div class="ctrl-toggle" onclick="toggleCtrl()">
+      <span class="ctrl-toggle-label">Inputs</span>
+      <span class="ctrl-chevron" id="ctrl-chev">▼</span>
+    </div>
+    <div class="ctrl-pills" id="ctrl-pills"></div>
+    <button class="ctrl-reset" onclick="resetAll()">Reset</button>
+  </div>
+  <div class="ctrl-panel" id="ctrl-panel">
+    <div class="ctrl-inner">
+      <div class="ctrl-grid">
+        <div class="sl-item">
+          <div class="sl-label">KP lbs / week <span class="sl-val" id="gv-lbs">400</span></div>
+          <div class="sl-sub">400 = Honda's current volume</div>
+          <input type="range" id="g-lbs" min="400" max="3000" step="50" value="400" oninput="go()">
+        </div>
+        <div class="sl-item">
+          <div class="sl-label">Wholesale sell-in (16oz) <span class="sl-val" id="gv-p16">$4.33</span></div>
+          <div class="sl-sub">What HF charges retailers per jar</div>
+          <input type="range" id="g-p16" min="2.50" max="7.00" step="0.25" value="4.33" oninput="go()">
+        </div>
+        <div class="sl-item">
+          <div class="sl-label">Wholesale sell-in (12oz) <span class="sl-val" id="gv-p12">$4.33</span></div>
+          <div class="sl-sub">Smaller jar, slightly lower price</div>
+          <input type="range" id="g-p12" min="2.00" max="6.00" step="0.25" value="4.33" oninput="go()">
+        </div>
+        <div class="sl-item">
+          <div class="sl-label">Distributor sell-in <span class="sl-val" id="gv-pdist">$4.00</span></div>
+          <div class="sl-sub">Armstrong, Hilo, D. Otani, Farm Link</div>
+          <input type="range" id="g-pdist" min="2.50" max="6.00" step="0.25" value="4.00" oninput="go()">
+        </div>
+        <div class="sl-item">
+          <div class="sl-label">Costco 32oz sell-in <span class="sl-val" id="gv-p32c">$8.75</span></div>
+          <div class="sl-sub">32oz 2-pack to Costco Hawaii</div>
+          <input type="range" id="g-p32c" min="5.00" max="15.00" step="0.25" value="8.75" oninput="go()">
+        </div>
+        <div class="sl-item">
+          <div class="sl-label">Honda fee (16oz) <span class="sl-val" id="gv-f16">$1.40</span></div>
+          <div class="sl-sub">Processing + delivery per 16oz jar</div>
+          <input type="range" id="g-f16" min="0.50" max="3.00" step="0.10" value="1.40" oninput="go()">
+        </div>
+        <div class="sl-item">
+          <div class="sl-label">Honda fee (12oz) <span class="sl-val" id="gv-f12">$1.20</span></div>
+          <div class="sl-sub">Processing + delivery per 12oz jar</div>
+          <input type="range" id="g-f12" min="0.50" max="2.50" step="0.10" value="1.20" oninput="go()">
+        </div>
+        <div class="sl-item">
+          <div class="sl-label">Cuke production cost <span class="sl-val" id="gv-ccost">$0.40</span></div>
+          <div class="sl-sub">Internal cost per lb, greenhouse</div>
+          <input type="range" id="g-ccost" min="0.10" max="1.50" step="0.05" value="0.40" oninput="go()">
+        </div>
+        <div class="sl-item">
+          <div class="sl-label">Retailer markup % <span class="sl-val" id="gv-mu">50%</span></div>
+          <div class="sl-sub">Foodland ~60%, Safeway ~50%, KTA ~78%</div>
+          <input type="range" id="g-mu" min="20" max="80" step="5" value="50" oninput="go()">
+        </div>
+      </div>
+      <div class="ctrl-footer">
+        All charts, tables, and figures update instantly. <strong>12oz / 16oz toggle</strong> in the top-right switches jar size globally.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PAGE: OVERVIEW ═══════════════════════════════════ -->
+<div class="page on" id="page-overview">
+  <div class="sec">
+    <h2>Keiki Pickles — Business Overview</h2>
+    <p>Co-packer model. Hawaii Farming owns the brand, sets pricing, and manages all accounts. Honda Foods processes and delivers for a flat fee per jar.</p>
+  </div>
+
+  <div class="g4">
+    <div class="stat"><div class="stat-val g" id="ov-jpl">1.67×</div><div class="stat-label">Jars per lb cucumber</div><div class="stat-sub" id="ov-jpl-sub">at 60% cucumber / jar</div></div>
+    <div class="stat"><div class="stat-val" id="ov-shelf">$6.50</div><div class="stat-label">Est. shelf price</div><div class="stat-sub" id="ov-shelf-sub">HF collects $4.33 — retailer adds 50%</div></div>
+    <div class="stat"><div class="stat-val g" id="ov-net-jar">$2.65</div><div class="stat-label">HF net per jar</div><div class="stat-sub" id="ov-net-sub">after Honda fee + cuke cost</div></div>
+    <div class="stat"><div class="stat-val o" id="ov-net-lb">$4.42</div><div class="stat-label">HF net per lb cucumber</div><div class="stat-sub">vs $0.40 production cost</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><h3>The Model</h3></div>
+      <div class="card-body">
+        <table class="tbl">
+          <tr><th>Party</th><th>Role</th><th class="r">Earns</th></tr>
+          <tr><td><strong>Hawaii Farming</strong></td><td>Brand owner · Sets prices · Manages all accounts · Collects all revenue</td><td class="r" id="ov-hf-earn">$2.65 / jar</td></tr>
+          <tr><td><strong>Honda Foods</strong></td><td>Processes · Jars · Labels · Delivers — flat fee, no upside</td><td class="r" id="ov-honda-earn">$1.40 / jar</td></tr>
+        </table>
+        <div class="co co-g" style="margin-top:12px">
+          Honda already produces cucumber kimchi at 400 lbs/week. KP-02 requires no recipe development — just labeling.
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Per-Jar Flow <span id="ov-size-lbl" style="font-weight:400;color:var(--stone);margin-left:6px">(16oz)</span></h3></div>
+      <div class="card-body">
+        <div class="flow" id="ov-flow"></div>
+        <div class="co co-g" id="ov-flow-note"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><h3>Net per lb cucumber — all channels</h3></div>
+      <div class="card-body" id="ov-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Two SKUs at Launch</h3></div>
+      <div class="card-body">
+        <table class="tbl">
+          <tr><th>SKU</th><th>Product</th><th>Size</th><th class="r">Target Retail</th><th class="r">$/oz</th></tr>
+          <tr>
+            <td><span class="tag tg">KP-01</span></td>
+            <td><strong>Classic Dill</strong></td>
+            <td>16oz</td>
+            <td class="r" id="sku-01-shelf">$6.50</td>
+            <td class="r" id="sku-01-ppoz">$0.41</td>
+          </tr>
+          <tr>
+            <td><span class="tag to">KP-02</span></td>
+            <td><strong>Cucumber Kim Chee</strong></td>
+            <td>12oz</td>
+            <td class="r" id="sku-02-shelf">$5.25</td>
+            <td class="r" id="sku-02-ppoz">$0.44</td>
+          </tr>
+        </table>
+        <div class="div"></div>
+        <div class="co co-o">
+          <strong>Why two sizes?</strong> KP-01 (dill) at 16oz matches the mainland standard format shoppers already buy. KP-02 (kimchi) at 12oz matches what Halm's and A-1 shoppers already expect — and we offer 20% more product at a similar price.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PAGE: ECONOMICS ══════════════════════════════════ -->
+<div class="page" id="page-economics">
+  <div class="sec">
+    <h2>Economics</h2>
+    <p>What goes into every jar, what we collect, and what's left. Toggle jar size in the top-right to compare 12oz vs 16oz.</p>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="card-head"><h3>Inside the Jar</h3><span class="badge bg" id="ec-size-badge">16oz</span></div>
+      <div class="card-body">
+        <div style="display:flex;gap:20px;align-items:flex-end;margin-bottom:16px">
+          <div>
+            <div style="width:72px" id="ec-jar-wrap">
+              <div style="height:9px;background:#999;border-radius:3px 3px 0 0;margin-bottom:-1px"></div>
+              <div style="border:2px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden">
+                <div id="ec-brine-bar" style="background:#BFE9FF;height:40px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:#1E6B9A">brine</div>
+                <div id="ec-cuke-bar" style="background:var(--mint);height:60px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--forest)">cuke</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1">
+            <table class="tbl">
+              <tr><td>Net weight</td><td class="r"><strong id="ec-netweight">16 oz</strong></td></tr>
+              <tr><td>Cucumber</td><td class="r" id="ec-cuke-wt"><strong>0.60 lbs (60%)</strong></td></tr>
+              <tr><td>Brine</td><td class="r" id="ec-brine-wt">0.40 lbs (40%)</td></tr>
+              <tr><td>Jars per lb cuke</td><td class="r"><strong id="ec-jpl">1.667</strong></td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="co co-g" id="ec-brine-note">
+          The brine is the advantage. You charge for a full 16oz but only use 0.60 lbs of cucumber.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Cost Per Jar</h3></div>
+      <div class="card-body">
+        <table class="tbl">
+          <tr><th>Item</th><th class="r">Cost</th><th class="r">% of Revenue</th></tr>
+          <tr><td>Honda fee</td><td class="r" id="ec-fee">$1.40</td><td class="r" id="ec-fee-pct">32%</td></tr>
+          <tr><td>Cucumber (production cost)</td><td class="r" id="ec-cuke-cost">$0.24</td><td class="r" id="ec-cuke-pct">6%</td></tr>
+          <tr><td>Brine ingredients</td><td class="r" id="ec-brine-cost">$0.04</td><td class="r" id="ec-brine-pct">1%</td></tr>
+          <tr class="tot"><td>Total cost out</td><td class="r" id="ec-total-cost">$1.68</td><td class="r" id="ec-total-pct">39%</td></tr>
+          <tr><td>HF wholesale sell-in</td><td class="r" id="ec-ws">$4.33</td><td class="r">100%</td></tr>
+          <tr class="tot"><td><strong>HF net profit / jar</strong></td><td class="r" id="ec-net-jar"><strong>$2.65</strong></td><td class="r" id="ec-net-pct"><strong>61%</strong></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Revenue per lb Cucumber</h3></div>
+      <div class="card-body">
+        <table class="tbl">
+          <tr><th>Scenario</th><th class="r">Revenue/lb</th></tr>
+          <tr><td>Sell raw (production cost basis)</td><td class="r mono" id="ec-raw">$0.40</td></tr>
+          <tr><td>KP wholesale (this jar size)</td><td class="r mono" id="ec-kp-rev-lb">$7.22</td></tr>
+          <tr class="tot"><td>HF net / lb cucumber</td><td class="r" id="ec-net-lb">$4.42</td></tr>
+        </table>
+        <div class="div"></div>
+        <div class="cw h160"><canvas id="ec-donut"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Retail Price Sensitivity — Markup % vs Shelf Price</h3></div>
+    <div class="card-body">
+      <div class="cw h220"><canvas id="ec-markup-chart"></canvas></div>
+      <div class="co co-o" style="margin-top:12px" id="ec-markup-note">HF sells to retailer at $4.33/jar. At 50% markup → $6.50 shelf. Target: $6.49–$6.69.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PAGE: COMPETITIVE ════════════════════════════════ -->
+<div class="page" id="page-competitive">
+  <div class="sec">
+    <h2>Competitive Landscape</h2>
+    <p>Real shelf data from Foodland, KTA, and Safeway photographed in-store. All prices verified March 2026.</p>
+  </div>
+
+  <div class="g4" style="margin-bottom:16px">
+    <div class="stat"><div class="stat-val g" id="cp-kp-ppoz">$0.41</div><div class="stat-label">KP target $/oz</div><div class="stat-sub" id="cp-kp-size">16oz at $6.50</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--stone)">$0.23</div><div class="stat-label">Cheapest mainland</div><div class="stat-sub">Majestic 24oz on sale</div></div>
+    <div class="stat"><div class="stat-val o">$0.80</div><div class="stat-label">Most expensive local</div><div class="stat-sub">Halm's 10oz at Costco</div></div>
+    <div class="stat"><div class="stat-val g">0</div><div class="stat-label">Local dill pickle brands</div><div class="stat-sub">KP-01 would be first</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-head"><h3>All Competitors — Real Shelf Data</h3></div>
+    <div class="card-body" style="padding:0;overflow-x:auto">
+      <table class="tbl">
+        <thead><tr>
+          <th>Brand</th><th>Product</th><th class="c">Origin</th>
+          <th class="r">Size</th><th class="r">Retail Price</th><th class="r">$/oz</th>
+          <th class="r">16oz Equiv</th><th>Store</th>
+        </tr></thead>
+        <tbody>
+          <!-- Local -->
+          <tr class="comp-local"><td><strong>Yeong Suks</strong></td><td>Spicy Takuwan (Pickled Daikon)</td><td class="c"><span class="tag tg">🌺 Local</span></td><td class="r">12oz</td><td class="r">$8.99</td><td class="r">$0.75</td><td class="r">$11.98</td><td>Foodland</td></tr>
+          <tr class="comp-local"><td><strong>Kewalo</strong></td><td>Spiced Pickled Radish</td><td class="c"><span class="tag tg">🌺 Local</span></td><td class="r">10oz</td><td class="r">$6.99</td><td class="r">$0.70</td><td class="r">$11.18</td><td>Foodland</td></tr>
+          <tr class="comp-local"><td><strong>A-1 (Halm's)</strong></td><td>Cucumber Kim Chee</td><td class="c"><span class="tag tg">🌺 Local</span></td><td class="r">10oz</td><td class="r">$7.49</td><td class="r">$0.75</td><td class="r">$11.98</td><td>Foodland</td></tr>
+          <tr class="comp-local"><td><strong>Halm's</strong></td><td>Korean Cucumber Kim Chee</td><td class="c"><span class="tag tg">🌺 Local</span></td><td class="r">10oz</td><td class="r">$7.99</td><td class="r">$0.80</td><td class="r">$12.78</td><td>Costco</td></tr>
+          <tr class="comp-local"><td><strong>Halm's</strong></td><td>Korean Cucumber Kim Chee</td><td class="c"><span class="tag tg">🌺 Local</span></td><td class="r">10oz</td><td class="r">$5.99</td><td class="r">$0.60</td><td class="r">$9.58</td><td>Foodland (sale)</td></tr>
+          <!-- Mainland -->
+          <tr><td><strong>Del Monte</strong></td><td>Sweet Whole Pickles</td><td class="c"><span class="tag tb">🚢 Mainland</span></td><td class="r">22oz</td><td class="r">$8.99</td><td class="r">$0.41</td><td class="r">$6.54</td><td>KTA</td></tr>
+          <tr><td><strong>Majestic Picklery</strong></td><td>Kosher Baby Dills</td><td class="c"><span class="tag tb">🚢 Mainland</span></td><td class="r">24oz</td><td class="r">$7.49</td><td class="r">$0.31</td><td class="r">$4.99</td><td>KTA</td></tr>
+          <tr><td><strong>Majestic Picklery</strong></td><td>Kosher Baby Dills (member price)</td><td class="c"><span class="tag tb">🚢 Mainland</span></td><td class="r">24oz</td><td class="r">$5.49</td><td class="r">$0.23</td><td class="r">$3.66</td><td>Safeway</td></tr>
+          <tr><td><strong>Mt. Olive</strong></td><td>Hamburger Dill Chips</td><td class="c"><span class="tag tb">🚢 Mainland</span></td><td class="r">16oz</td><td class="r">$5.49</td><td class="r">$0.34</td><td class="r">$5.49</td><td>KTA</td></tr>
+          <tr><td><strong>Signature Select</strong></td><td>Pickle Slicers Dill (store brand)</td><td class="c"><span class="tag tb">🚢 Mainland</span></td><td class="r">16oz</td><td class="r">$4.49</td><td class="r">$0.28</td><td class="r">$4.49</td><td>KTA</td></tr>
+          <!-- KP -->
+          <tr class="hi"><td><strong>KP-01 (target)</strong></td><td>Classic Dill — Hawaii Farming</td><td class="c"><span class="tag tg">🌺 Local</span></td><td class="r">16oz</td><td class="r" id="cp-kp01-retail">$6.50</td><td class="r" id="cp-kp01-ppoz">$0.41</td><td class="r" id="cp-kp01-equiv">$6.50</td><td>Retail chains</td></tr>
+          <tr class="hi"><td><strong>KP-02 (target)</strong></td><td>Cucumber Kim Chee — Hawaii Farming</td><td class="c"><span class="tag tg">🌺 Local</span></td><td class="r">12oz</td><td class="r" id="cp-kp02-retail">$5.25</td><td class="r" id="cp-kp02-ppoz">$0.44</td><td class="r" id="cp-kp02-equiv">$7.00</td><td>Retail chains</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><h3>$/oz Comparison — KP vs Shelf</h3></div>
+      <div class="card-body" id="cp-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Where KP Sits</h3></div>
+      <div class="card-body">
+        <div class="co co-g">
+          <strong>KP-01 Classic Dill (16oz)</strong> — priced above all mainland brands, below all local Hawaii brands. The only Hawaii-grown traditional dill pickle in the market. Zero direct local competition.
+        </div>
+        <div class="co co-o" style="margin-top:8px">
+          <strong>KP-02 Cucumber Kim Chee (12oz)</strong> — competing directly with Halm's and A-1, but with a stronger value proposition: 20% more product (12oz vs 10oz) at a lower or equal price, using Keiki cucumbers grown in Waimea.
+        </div>
+        <div class="div"></div>
+        <table class="tbl">
+          <tr><th>KP-01 vs</th><th class="r">$/oz diff</th><th class="r">KP cheaper by</th></tr>
+          <tr><td>Halm's @ Foodland ($5.99/10oz)</td><td class="r" id="vs-halms-f">$0.60</td><td class="r" id="vs-halms-f-diff" style="color:var(--forest)">−$0.19/oz</td></tr>
+          <tr><td>Halm's @ Costco ($7.99/10oz)</td><td class="r" id="vs-halms-c">$0.80</td><td class="r" id="vs-halms-c-diff" style="color:var(--forest)">−$0.39/oz</td></tr>
+          <tr><td>Mt. Olive 16oz ($5.49)</td><td class="r">$0.34</td><td class="r" id="vs-mtolive" style="color:var(--red)">+$0.07/oz</td></tr>
+          <tr><td>Signature Select 16oz ($4.49)</td><td class="r">$0.28</td><td class="r" id="vs-sigsel" style="color:var(--red)">+$0.13/oz</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PAGE: GROWTH PLAN ════════════════════════════════ -->
+<div class="page" id="page-phases">
+  <div class="sec">
+    <h2>Growth Plan</h2>
+    <p>Four phases from Honda's existing 400 lbs/week volume to full Hawaii distribution.</p>
+  </div>
+
+  <div class="stepper">
+    <div class="step on" onclick="showPhase(0,this)"><strong>Phase 1</strong>400 lbs/wk · Month 1–3</div>
+    <div class="step" onclick="showPhase(1,this)"><strong>Phase 2</strong>825 lbs/wk · Month 4–9</div>
+    <div class="step" onclick="showPhase(2,this)"><strong>Phase 3</strong>1,750 lbs/wk · Month 10–18</div>
+    <div class="step" onclick="showPhase(3,this)"><strong>Phase 4</strong>3,000 lbs/wk · Month 18+</div>
+  </div>
+
+  <div class="g2" id="phases-detail">
+    <div class="card">
+      <div class="card-head"><h3 id="ph-title">Phase 1 — Launch</h3><span class="badge bg" id="ph-badge">400 lbs/wk</span></div>
+      <div class="card-body">
+        <div class="g2" style="margin-bottom:12px">
+          <div class="stat"><div class="stat-val g" id="ph-net">$49K</div><div class="stat-label">HF net / yr</div></div>
+          <div class="stat"><div class="stat-val b" id="ph-honda">$22K</div><div class="stat-label">Honda earns / yr</div></div>
+        </div>
+        <table class="tbl">
+          <tr><td>Channels</td><td class="r" id="ph-channels">Foodland · Safeway · KTA · Honaunau</td></tr>
+          <tr><td>Jars / week</td><td class="r" id="ph-jars">667</td></tr>
+          <tr><td>Annual revenue</td><td class="r" id="ph-rev">$74K</td></tr>
+          <tr><td>Honda fees / yr</td><td class="r" id="ph-fee" style="color:var(--red)">$22K</td></tr>
+          <tr><td>Cucumber cost / yr</td><td class="r" id="ph-cuke" style="color:var(--gold)">$4K</td></tr>
+          <tr class="tot"><td>HF net / yr</td><td class="r" id="ph-net2">$49K</td></tr>
+        </table>
+        <div class="co co-g" style="margin-top:12px" id="ph-note">Start where Honda already operates.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Net profit across all phases (live)</h3></div>
+      <div class="card-body"><div class="cw h280"><canvas id="phase-chart"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:0">
+    <div class="card-head"><h3>All phases compared (live with sliders)</h3></div>
+    <div class="card-body" style="padding:0;overflow-x:auto">
+      <table class="tbl"><thead><tr>
+        <th>Metric</th><th class="r">Phase 1</th><th class="r">Phase 2</th><th class="r">Phase 3</th><th class="r">Phase 4</th>
+      </tr></thead><tbody id="phases-compare"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PAGE: P&L ═════════════════════════════════════════ -->
+<div class="page" id="page-pnl">
+  <div class="sec">
+    <h2>Full P&amp;L</h2>
+    <p>Channel-by-channel breakdown at full scale (Phase 4, 3,000 lbs/week). All numbers update with sliders.</p>
+  </div>
+
+  <div class="g4" style="margin-bottom:16px">
+    <div class="stat"><div class="stat-val g" id="pnl-rev">$1.15M</div><div class="stat-label">Annual revenue</div><div class="stat-sub">Phase 4 full scale</div></div>
+    <div class="stat"><div class="stat-val r" id="pnl-honda">$335K</div><div class="stat-label">Honda fees / yr</div></div>
+    <div class="stat"><div class="stat-val o" id="pnl-cuke">$62K</div><div class="stat-label">Cucumber cost / yr</div></div>
+    <div class="stat"><div class="stat-val g" id="pnl-net">$751K</div><div class="stat-label">HF net profit / yr</div><div class="stat-sub" id="pnl-margin">65% margin</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><h3>Net by channel (Phase 4)</h3></div>
+      <div class="card-body"><div class="cw h280"><canvas id="pnl-bar"></canvas></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Revenue waterfall</h3></div>
+      <div class="card-body"><div class="cw h280"><canvas id="pnl-waterfall"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Channel P&L — Phase 4</h3></div>
+    <div class="card-body" style="padding:0;overflow-x:auto">
+      <table class="tbl"><thead><tr>
+        <th>Channel</th><th>Type</th><th class="r">lbs/wk</th><th class="r">Sell-in</th>
+        <th class="r">Ann Revenue</th><th class="r">Ann Honda Fee</th><th class="r">Ann Cuke Cost</th><th class="r">HF Net / yr</th>
+      </tr></thead><tbody id="pnl-tbody"></tbody></table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-head"><h3>Wholesale Price Negotiation Matrix</h3><span style="font-size:10px;color:var(--stone)">Current price highlighted</span></div>
+    <div class="card-body" style="padding:0;overflow-x:auto">
+      <table class="tbl"><thead><tr>
+        <th>HF Wholesale</th><th class="r">Shelf (50%)</th><th class="r">Shelf (60%)</th>
+        <th class="r">Net/jar</th><th class="r">Net/lb</th>
+        <th class="r">400 lbs/wk</th><th class="r">825 lbs/wk</th><th class="r">1,750 lbs/wk</th><th class="r">3,000 lbs/wk</th>
+        <th class="c">Grade</th>
+      </tr></thead><tbody id="matrix-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PAGE: RISKS ══════════════════════════════════════ -->
+<div class="page" id="page-risks">
+  <div class="sec"><h2>Risk Analysis</h2><p>Click any risk to see the mitigation strategy.</p></div>
+  <div class="risk-grid" id="risk-grid"></div>
+  <div class="co co-o" id="risk-detail" style="margin-bottom:16px"><strong>Select a risk above</strong> to see full details and mitigation.</div>
+</div>
+
+<!-- ═══════════════════ PAGE: CHECKLIST ══════════════════════════════════ -->
+<div class="page" id="page-checklist">
+  <div class="sec"><h2>Launch Checklist</h2></div>
+  <div class="g3" style="margin-bottom:10px">
+    <div class="stat"><div class="stat-val g" id="cl-pct">0%</div><div class="stat-label">Launch readiness</div></div>
+    <div class="stat"><div class="stat-val" id="cl-done">0</div><div class="stat-label">Complete</div></div>
+    <div class="stat"><div class="stat-val r" id="cl-rem">30</div><div class="stat-label">Remaining</div></div>
+  </div>
+  <div class="prog"><div class="prog-fill" id="cl-bar" style="width:0%"></div></div>
+  <div class="g2" id="cl-grid"></div>
+</div>
+
+<script>
+// ══ STATE ════════════════════════════════════════════════════════════════
+const DEF = { lbs:400, p16:4.33, p12:4.33, pdist:4.00, p32c:8.75, f16:1.40, f12:1.20, ccost:0.40, mu:50 };
+let G = {...DEF};
+let JAR = 16; // active jar size: 12 or 16
+let charts = {};
+let activePhase = 0;
+
+const C = { forest:'#1B4332', pine:'#2D6A4F', sage:'#52B788', gold:'#C8941A', red:'#DC2626', blue:'#2563EB', stone:'#6B7280', light:'#F4F4F0', mint:'#D8F3DC' };
+
+// ══ JAR MATH ═════════════════════════════════════════════════════════════
+function cpct() { return 0.60; } // cucumber % per jar
+function jpl()  { return 1 / cpct(); } // jars per lb
+function jpl32(){ return 1 / (cpct() * 2); }
+function cukePerJar(oz) { return (oz / 16) * cpct(); } // lbs cuke per jar of given size
+function jplOz(oz) { return 1 / cukePerJar(oz); }
+function brine(oz) { return 0.04 * oz / 16; }
+function ws()   { return JAR === 12 ? G.p12 : G.p16; }
+function fee()  { return JAR === 12 ? G.f12 : G.f16; }
+function cpj()  { return cukePerJar(JAR); }
+function netJar(wsPrice, feeAmt, oz) { return wsPrice - feeAmt - cukePerJar(oz)*G.ccost - brine(oz); }
+function netLb(wsPrice, feeAmt, oz)  { return netJar(wsPrice, feeAmt, oz) * jplOz(oz); }
+function shelf(wsPrice) { return wsPrice * (1 + G.mu/100); }
+function f$(v)  { return v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1e3?'$'+(v/1e3).toFixed(0)+'K':'$'+v.toFixed(0); }
+function fp(v, d=2) { return '$'+v.toFixed(d); }
+function ppoz(wsPrice, oz) { return shelf(wsPrice) / oz; }
+
+// ══ SLIDER READ ══════════════════════════════════════════════════════════
+function readSliders() {
+  G = {
+    lbs:   +document.getElementById('g-lbs').value,
+    p16:   +document.getElementById('g-p16').value,
+    p12:   +document.getElementById('g-p12').value,
+    pdist: +document.getElementById('g-pdist').value,
+    p32c:  +document.getElementById('g-p32c').value,
+    f16:   +document.getElementById('g-f16').value,
+    f12:   +document.getElementById('g-f12').value,
+    ccost: +document.getElementById('g-ccost').value,
+    mu:    +document.getElementById('g-mu').value,
+  };
+}
+
+// ══ GO — master update ═══════════════════════════════════════════════════
+function go() {
+  readSliders();
+  updatePills();
+  updateOverview();
+  updateEconomics();
+  updateCompetitive();
+  updatePhases();
+  updatePNL();
+  updateAllCharts();
+  // update slider display values
+  const sv = (id, v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+  sv('gv-lbs',   Math.round(G.lbs).toLocaleString());
+  sv('gv-p16',   fp(G.p16));
+  sv('gv-p12',   fp(G.p12));
+  sv('gv-pdist', fp(G.pdist));
+  sv('gv-p32c',  fp(G.p32c));
+  sv('gv-f16',   fp(G.f16));
+  sv('gv-f12',   fp(G.f12));
+  sv('gv-ccost', fp(G.ccost));
+  sv('gv-mu',    G.mu+'%');
+}
+
+function setSize(oz, el) {
+  JAR = oz;
+  document.querySelectorAll('.sz-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  go();
+}
+
+function resetAll() {
+  Object.entries(DEF).forEach(([k,v]) => { const e=document.getElementById('g-'+k); if(e) e.value=v; });
+  go();
+}
+
+// ══ PILLS ════════════════════════════════════════════════════════════════
+function updatePills() {
+  const items = [
+    {k:'lbs', fmt:v=>Math.round(v)+'lbs'},
+    {k:'p16', fmt:v=>'$'+v.toFixed(2)+' ws16'},
+    {k:'p12', fmt:v=>'$'+v.toFixed(2)+' ws12'},
+    {k:'pdist',fmt:v=>'$'+v.toFixed(2)+' dist'},
+    {k:'p32c', fmt:v=>'$'+v.toFixed(2)+' Costco'},
+    {k:'f16',  fmt:v=>'$'+v.toFixed(2)+' fee16'},
+    {k:'f12',  fmt:v=>'$'+v.toFixed(2)+' fee12'},
+    {k:'ccost',fmt:v=>'$'+v.toFixed(2)+'/lb cost'},
+    {k:'mu',   fmt:v=>v+'% markup'},
+  ];
+  document.getElementById('ctrl-pills').innerHTML = items.map(it => {
+    const dirty = Math.abs(G[it.k] - DEF[it.k]) > 0.001;
+    return `<span class="pill${dirty?' changed':''}">${it.fmt(G[it.k])}</span>`;
+  }).join('');
+}
+
+// ══ OVERVIEW ═════════════════════════════════════════════════════════════
+function updateOverview() {
+  const wsActive = ws(), feeActive = fee(), oz = JAR;
+  const jplV = jplOz(oz);
+  const netJ = netJar(wsActive, feeActive, oz);
+  const nlb  = netLb(wsActive, feeActive, oz);
+  const shelfP = shelf(wsActive);
+
+  const sv = (id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  sv('ov-jpl', jplV.toFixed(2)+'×');
+  sv('ov-jpl-sub', `at 60% cucumber / ${oz}oz jar`);
+  sv('ov-shelf', fp(shelfP));
+  sv('ov-shelf-sub', `HF collects ${fp(ws())} — retailer adds ${G.mu}%`);
+  sv('ov-net-jar', fp(netJ));
+  sv('ov-net-sub', `after Honda fee + cuke cost`);
+  sv('ov-net-lb', fp(nlb));
+  sv('ov-size-lbl', `(${oz}oz)`);
+  sv('ov-hf-earn', fp(netJ)+' / jar');
+  sv('ov-honda-earn', fp(feeActive)+' / jar');
+
+  // Flow
+  const fl = document.getElementById('ov-flow');
+  if(fl) fl.innerHTML = [
+    {v:fp(wsActive), l:'HF collects', cls:''},
+    {v:'−'+fp(feeActive), l:'Honda fee', cls:'neg'},
+    {v:'−'+fp(cpj()*G.ccost), l:`Cuke (${oz===16?'0.60':'0.45'} lbs)`, cls:'neg'},
+    {v:'−'+fp(brine(oz)), l:'Brine', cls:'neg'},
+    {v:fp(netJ), l:'HF net', cls:''},
+  ].map(f=>`<div class="fb ${f.cls}"><div class="fb-val">${f.v}</div><div class="fb-lbl">${f.l}</div></div>`).join('');
+
+  const fn = document.getElementById('ov-flow-note');
+  if(fn) fn.innerHTML = `At $${wsActive.toFixed(2)} wholesale → HF nets <strong>${fp(netJ)}/jar</strong> and <strong>${fp(nlb)}/lb</strong> of cucumber. ${jplV.toFixed(2)} jars from every pound.`;
+
+  // SKU table
+  sv('sku-01-shelf', fp(shelf(G.p16)));
+  sv('sku-01-ppoz', fp(shelf(G.p16)/16, 2)+'/oz');
+  sv('sku-02-shelf', fp(shelf(G.p12)));
+  sv('sku-02-ppoz', fp(shelf(G.p12)/12, 2)+'/oz');
+
+  // Bars
+  const bars = [
+    {l:'Raw (cost basis)', v:G.ccost,                          c:C.stone},
+    {l:'Distributor 16oz', v:netLb(G.pdist,G.f16,16),         c:C.pine},
+    {l:'Walmart 16oz',     v:netLb(G.p16*0.92,G.f16,16),      c:C.pine},
+    {l:'Retail 16oz',      v:netLb(G.p16,G.f16,16),           c:C.forest},
+    {l:`Active (${oz}oz)`, v:nlb,                              c:C.sage},
+    {l:"Sam's 32oz",       v:netLb(G.p32c*0.94,1.80,32),      c:C.gold},
+    {l:'Costco 32oz',      v:netLb(G.p32c,1.80,32),           c:C.gold},
+  ];
+  const maxV = Math.max(...bars.map(b=>b.v));
+  const barEl = document.getElementById('ov-bars');
+  if(barEl) barEl.innerHTML = bars.map(b => `
+    <div class="bar-row">
+      <div class="bar-lbl">${b.l}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(4,(b.v/maxV*100)).toFixed(0)}%;background:${b.c}">${b.v>=0?fp(b.v):''}</div></div>
+      <div class="bar-end">${fp(b.v)}/lb</div>
+    </div>`).join('');
+}
+
+// ══ ECONOMICS ════════════════════════════════════════════════════════════
+function updateEconomics() {
+  const oz = JAR, wsActive = ws(), feeActive = fee();
+  const cpjV = cukePerJar(oz);
+  const netJ = netJar(wsActive, feeActive, oz);
+  const nlb  = netLb(wsActive, feeActive, oz);
+  const brineV = brine(oz);
+  const totalCost = feeActive + cpjV*G.ccost + brineV;
+
+  const sv=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  sv('ec-size-badge', oz+'oz');
+  sv('ec-netweight', oz+' oz');
+  sv('ec-cuke-wt', cpjV.toFixed(3)+' lbs (60%)');
+  sv('ec-brine-wt', (oz/16*0.40).toFixed(3)+' lbs (40%)');
+  sv('ec-jpl', jplOz(oz).toFixed(3));
+  sv('ec-fee', fp(feeActive));
+  sv('ec-fee-pct', Math.round(feeActive/wsActive*100)+'%');
+  sv('ec-cuke-cost', fp(cpjV*G.ccost));
+  sv('ec-cuke-pct', Math.round(cpjV*G.ccost/wsActive*100)+'%');
+  sv('ec-brine-cost', fp(brineV, 3));
+  sv('ec-brine-pct', Math.round(brineV/wsActive*100)+'%');
+  sv('ec-total-cost', fp(totalCost));
+  sv('ec-total-pct', Math.round(totalCost/wsActive*100)+'%');
+  sv('ec-ws', fp(wsActive));
+  sv('ec-net-jar', fp(netJ));
+  sv('ec-net-pct', Math.round(netJ/wsActive*100)+'%');
+  sv('ec-raw', fp(G.ccost));
+  sv('ec-kp-rev-lb', fp(wsActive * jplOz(oz)));
+  sv('ec-net-lb', fp(nlb));
+  sv('ec-brine-note', `The brine is the advantage. You charge for a full ${oz}oz jar but only use ${cpjV.toFixed(2)} lbs of cucumber. 1 lb fills ${jplOz(oz).toFixed(2)} jars.`);
+
+  // Jar visual proportions
+  const brineBar = document.getElementById('ec-brine-bar');
+  const cukeBar  = document.getElementById('ec-cuke-bar');
+  if(brineBar) { brineBar.style.height = (40*(oz/16))+'px'; brineBar.textContent = (oz/16*0.40).toFixed(2)+' lbs brine'; }
+  if(cukeBar)  { cukeBar.style.height  = (60*(oz/16))+'px'; cukeBar.textContent  = cpjV.toFixed(2)+' lbs cuke'; }
+
+  sv('ec-markup-note', `HF sells to retailer at $${wsActive.toFixed(2)}/jar. Retailer applies ${G.mu}% markup → shelf price $${shelf(wsActive).toFixed(2)} (${oz}oz = $${ppoz(wsActive,oz).toFixed(2)}/oz). Target retail: $6.49–$6.69.`);
+}
+
+// ══ COMPETITIVE ══════════════════════════════════════════════════════════
+function updateCompetitive() {
+  const kp01shelf = shelf(G.p16), kp02shelf = shelf(G.p12);
+  const sv=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  sv('cp-kp-ppoz',   fp(kp01shelf/16, 2)+'/oz');
+  sv('cp-kp-size',   `16oz at ${fp(kp01shelf)}`);
+  sv('cp-kp01-retail', fp(kp01shelf));
+  sv('cp-kp01-ppoz', fp(kp01shelf/16, 2)+'/oz');
+  sv('cp-kp01-equiv', fp(kp01shelf));
+  sv('cp-kp02-retail', fp(kp02shelf));
+  sv('cp-kp02-ppoz', fp(kp02shelf/12, 2)+'/oz');
+  sv('cp-kp02-equiv', fp(kp02shelf/12*16));
+
+  const kpppoz = kp01shelf/16;
+  sv('vs-halms-f-diff', fp(kpppoz - 0.599, 2)+'/oz '+(kpppoz<0.599?'cheaper':'more'));
+  sv('vs-halms-c-diff', fp(kpppoz - 0.799, 2)+'/oz '+(kpppoz<0.799?'cheaper':'more'));
+  sv('vs-mtolive',      fp(kpppoz - 0.343, 2)+'/oz '+(kpppoz>0.343?'more':'cheaper'));
+  sv('vs-sigsel',       fp(kpppoz - 0.281, 2)+'/oz '+(kpppoz>0.281?'more':'cheaper'));
+
+  // Comp bars
+  const comps = [
+    {l:'Sig Select 16oz', v:0.281, c:C.stone, type:'mainland'},
+    {l:'Majestic 24oz', v:0.313, c:C.stone, type:'mainland'},
+    {l:'Mt. Olive 16oz', v:0.343, c:C.stone, type:'mainland'},
+    {l:'Del Monte 22oz', v:0.409, c:C.stone, type:'mainland'},
+    {l:'KP-01 Dill 16oz ★', v:kp01shelf/16, c:C.forest, type:'kp'},
+    {l:'KP-02 Kimchi 12oz ★', v:kp02shelf/12, c:C.pine, type:'kp'},
+    {l:"Halm's Foodland", v:0.599, c:C.sage, type:'local'},
+    {l:"A-1 Cucumber", v:0.749, c:C.sage, type:'local'},
+    {l:"Halm's Costco", v:0.799, c:C.sage, type:'local'},
+    {l:"Kewalo Radish", v:0.699, c:C.sage, type:'local'},
+  ].sort((a,b)=>a.v-b.v);
+  const maxV = Math.max(...comps.map(c=>c.v));
+  const barEl = document.getElementById('cp-bars');
+  if(barEl) barEl.innerHTML = comps.map(c => `
+    <div class="bar-row">
+      <div class="bar-lbl" style="font-weight:${c.type==='kp'?'600':'400'}">${c.l}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(c.v/maxV*100).toFixed(0)}%;background:${c.c}">${fp(c.v,2)}/oz</div></div>
+      <div class="bar-end" style="color:${c.type==='kp'?C.forest:C.stone}">${fp(c.v,2)}</div>
+    </div>`).join('');
+}
+
+// ══ PHASES ═══════════════════════════════════════════════════════════════
+const PH_META = [
+  {lbs:400,  period:'Month 1–3',  channels:'Foodland · Safeway · KTA · Honaunau', note:'Start at Honda\'s existing 400 lbs/week volume. Prove the product sells.'},
+  {lbs:825,  period:'Month 4–9',  channels:'+ Walmart + Armstrong + Hilo + D. Otani', note:'Unlock all existing distributor relationships.'},
+  {lbs:1750, period:'Month 10–18',channels:"+ Sam's Club Hawaii (32oz)", note:"Sam's already buys 2,397 lbs/wk of our cukes."},
+  {lbs:3000, period:'Month 18+',  channels:'+ Costco Hawaii all 7 stores (32oz)', note:'Costco is our #1 cucumber customer — 21,062 lbs/wk.'},
+];
+const PH_MIX = [
+  {r:1.00,d:0.00,s:0.00,co:0.00},
+  {r:0.60,d:0.40,s:0.00,co:0.00},
+  {r:0.42,d:0.38,s:0.10,co:0.10},
+  {r:0.30,d:0.25,s:0.10,co:0.35},
+];
+
+function calcPhase(idx) {
+  const m = PH_MIX[idx], lbs = PH_META[idx].lbs;
+  const j16=(lbs*m.r+lbs*m.d)*jplOz(JAR), j32s=lbs*m.s*jplOz(32), j32c=lbs*m.co*jplOz(32);
+  const rev=(lbs*m.r)*jplOz(JAR)*ws()+(lbs*m.d)*jplOz(JAR)*G.pdist+j32s*G.p32c*0.94+j32c*G.p32c;
+  const hondaFee=j16*fee()+( j32s+j32c)*1.80;
+  const cuke=lbs*G.ccost;
+  return {rev,hondaFee,cuke,net:rev-hondaFee-cuke,jars:j16+j32s+j32c};
+}
+
+function showPhase(idx, el) {
+  activePhase = idx;
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('on'));
+  el.classList.add('on');
+  updatePhases();
+}
+
+function updatePhases() {
+  const ph = PH_META[activePhase], res = calcPhase(activePhase);
+  const sv=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  sv('ph-title', ph.period+' — '+ph.lbs.toLocaleString()+' lbs/wk');
+  sv('ph-badge', ph.lbs.toLocaleString()+' lbs/wk');
+  sv('ph-net',   f$(res.net*52));
+  sv('ph-honda', f$(res.hondaFee*52));
+  sv('ph-channels', ph.channels);
+  sv('ph-jars', Math.round(res.jars).toLocaleString());
+  sv('ph-rev',  f$(res.rev*52));
+  sv('ph-fee',  f$(res.hondaFee*52));
+  sv('ph-cuke', f$(res.cuke*52));
+  sv('ph-net2', f$(res.net*52));
+  sv('ph-note', ph.note);
+
+  const all = PH_META.map((_,i)=>calcPhase(i));
+  const rows = [
+    ['Period', PH_META.map(p=>p.period)],
+    ['lbs/week', PH_META.map(p=>p.lbs.toLocaleString())],
+    ['Jars/week', all.map(p=>'~'+Math.round(p.jars).toLocaleString())],
+    ['Annual revenue', all.map(p=>f$(p.rev*52))],
+    ['Honda fees/yr', all.map(p=>f$(p.hondaFee*52))],
+    ['Cuke cost/yr', all.map(p=>f$(p.cuke*52))],
+    ['HF net/yr', all.map(p=>f$(p.net*52))],
+    ['Net margin', all.map(p=>Math.round(p.net/p.rev*100)+'%')],
+    ['% of production', PH_META.map(p=>(p.lbs/37000*100).toFixed(1)+'%')],
+  ];
+  const tbody = document.getElementById('phases-compare');
+  if(tbody) tbody.innerHTML = rows.map((r,i)=>
+    `<tr${i===6?' class="tot"':''}><td>${r[0]}</td>${r[1].map(v=>`<td class="r">${v}</td>`).join('')}</tr>`
+  ).join('');
+}
+
+// ══ P&L ══════════════════════════════════════════════════════════════════
+const PNL_CHS = [
+  {name:'Foodland / Safeway / KTA', lbs:900,  is32:false, fn:g=>g.p16,        type:'Retail'},
+  {name:'Armstrong Produce',        lbs:450,  is32:false, fn:g=>g.pdist,       type:'Dist'},
+  {name:'Costco Hawaii (32oz)',      lbs:375,  is32:true,  fn:g=>g.p32c,        type:'Club'},
+  {name:'Hilo Products',            lbs:375,  is32:false, fn:g=>g.pdist,       type:'Dist'},
+  {name:'Walmart / Honaunau',       lbs:350,  is32:false, fn:g=>g.p16*0.92,    type:'Retail'},
+  {name:"Sam's Club (32oz)",        lbs:300,  is32:true,  fn:g=>g.p32c*0.94,   type:'Club'},
+  {name:'D. Otani / Farm Link',     lbs:250,  is32:false, fn:g=>g.pdist,       type:'Dist'},
+];
+
+function calcPNLChannel(ch) {
+  const wsP = ch.fn(G), feeP = ch.is32 ? 1.80 : fee();
+  const jplV = ch.is32 ? jplOz(32) : jplOz(JAR);
+  const jars = ch.lbs * jplV;
+  const rev = jars * wsP * 52;
+  const hondaF = jars * feeP * 52;
+  const cukeC = ch.lbs * G.ccost * 52;
+  const net = rev - hondaF - cukeC;
+  return { wsP, feeP, jplV, jars, rev, hondaF, cukeC, net };
+}
+
+function updatePNL() {
+  const chs = PNL_CHS.map(ch=>({...ch,...calcPNLChannel(ch)}));
+  const totRev = chs.reduce((s,c)=>s+c.rev,0);
+  const totFee = chs.reduce((s,c)=>s+c.hondaF,0);
+  const totCuke= chs.reduce((s,c)=>s+c.cukeC,0);
+  const totNet = chs.reduce((s,c)=>s+c.net,0);
+
+  const sv=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  sv('pnl-rev',    f$(totRev));
+  sv('pnl-honda',  f$(totFee));
+  sv('pnl-cuke',   f$(totCuke));
+  sv('pnl-net',    f$(totNet));
+  sv('pnl-margin', Math.round(totNet/totRev*100)+'% margin');
+
+  const tbody = document.getElementById('pnl-tbody');
+  if(tbody) tbody.innerHTML = chs.map(c=>`
+    <tr${c.type==='Club'?' class="hi"':''}><td><strong>${c.name}</strong></td>
+    <td><span class="tag ${c.type==='Club'?'to':c.type==='Dist'?'tb':'tg'}">${c.type}</span></td>
+    <td class="r">${c.lbs}</td><td class="r">${fp(c.wsP)}</td>
+    <td class="r">${f$(c.rev)}</td><td class="r" style="color:var(--red)">${f$(c.hondaF)}</td>
+    <td class="r" style="color:var(--gold)">${f$(c.cukeC)}</td>
+    <td class="r"><strong style="color:var(--forest)">${f$(c.net)}</strong></td></tr>`
+  ).join('') + `<tr class="tot"><td colspan="4"><strong>Total</strong></td>
+    <td class="r">${f$(totRev)}</td><td class="r">${f$(totFee)}</td>
+    <td class="r">${f$(totCuke)}</td><td class="r"><strong>${f$(totNet)}</strong></td></tr>`;
+
+  // Matrix
+  const wsRange = [3.75, 4.00, 4.06, 4.15, 4.25, 4.33, 4.50, 4.75, 5.00];
+  const matbody = document.getElementById('matrix-tbody');
+  if(matbody) {
+    const tc = fee() + cpj()*G.ccost + brine(JAR);
+    matbody.innerHTML = wsRange.map(ws=>{
+      const netJ = ws - tc;
+      const nlb  = netJ * jplOz(JAR);
+      const r50  = ws*1.50, r60=ws*1.60;
+      const isCur= Math.abs(ws-ws_active())<0.05;
+      const grade= netJ>=2.5?['tg','Strong']:netJ>=2.0?['tg','Good']:netJ>=1.5?['to','OK']:['tr','Low'];
+      const anns = [400,825,1750,3000].map(lbs=>`<td class="r">${f$(netJ*lbs*jplOz(JAR)*52)}</td>`).join('');
+      return `<tr${isCur?' class="hi"':''}><td class="mono" style="font-size:11px"><strong>$${ws.toFixed(2)}${isCur?' ←':''}</strong></td>
+        <td class="r">${fp(r50)}</td><td class="r">${fp(r60)}</td>
+        <td class="r">${fp(netJ)}</td><td class="r">${fp(nlb)}</td>${anns}
+        <td class="c"><span class="tag ${grade[0]}">${grade[1]}</span></td></tr>`;
+    }).join('');
+  }
+}
+function ws_active() { return JAR===12 ? G.p12 : G.p16; }
+
+// ══ CHARTS ═══════════════════════════════════════════════════════════════
+function mk(id, cfg) {
+  if(charts[id]) charts[id].destroy();
+  const el = document.getElementById(id);
+  if(!el) return;
+  return charts[id] = new Chart(el, cfg);
+}
+function baseOpts(yFmt=v=>v) {
+  return { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false} },
+    scales:{ x:{grid:{color:'#F4F4F0'},ticks:{color:C.stone,font:{size:10}}},
+             y:{grid:{color:'#F4F4F0'},ticks:{color:C.stone,font:{size:10},callback:yFmt}} }};
+}
+
+function updateAllCharts() {
+  // Donut: cost breakdown
+  const oz=JAR, wsA=ws(), feeA=fee();
+  const netJ=netJar(wsA,feeA,oz);
+  mk('ec-donut',{type:'doughnut',data:{
+    labels:['HF Net','Honda Fee','Cucumber','Brine'],
+    datasets:[{data:[+netJ.toFixed(2),feeA,+(cukePerJar(oz)*G.ccost).toFixed(2),brine(oz)],
+      backgroundColor:[C.forest,C.red,C.gold,C.sage],borderWidth:3,borderColor:'#fff'}]
+  },options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+    plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},color:C.stone,boxWidth:10}},
+    tooltip:{callbacks:{label:c=>'$'+c.raw.toFixed(2)}}}}});
+
+  // Markup sensitivity
+  const muRange=[20,30,40,50,60,70,80];
+  mk('ec-markup-chart',{type:'bar',data:{
+    labels:muRange.map(m=>m+'%'),
+    datasets:[
+      {label:'HF Net',         data:muRange.map(()=>+netJ.toFixed(2)), backgroundColor:C.forest, stack:'s'},
+      {label:'Retailer Margin',data:muRange.map(m=>+(wsA*m/100).toFixed(2)), backgroundColor:C.gold, stack:'s'},
+    ]
+  },options:{...baseOpts(v=>'$'+v.toFixed(2)),plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},color:C.stone,boxWidth:10}},tooltip:{callbacks:{label:c=>c.dataset.label+': $'+c.raw.toFixed(2)}}},scales:{x:{grid:{display:false},ticks:{color:C.stone,font:{size:10}},stacked:true},y:{grid:{color:'#F4F4F0'},ticks:{callback:v=>'$'+v.toFixed(2),color:C.stone,font:{size:10}},stacked:true}}}});
+
+  // Phase chart
+  const phNets = PH_META.map((_,i)=>Math.round(calcPhase(i).net*52));
+  mk('phase-chart',{type:'bar',data:{
+    labels:['Phase 1','Phase 2','Phase 3','Phase 4'],
+    datasets:[{data:phNets,backgroundColor:[C.forest,C.pine,C.sage,C.gold],borderRadius:4,borderSkipped:false}]
+  },options:{...baseOpts(v=>'$'+(v/1000).toFixed(0)+'K'),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.raw.toLocaleString()}}}}});
+
+  // PNL bar
+  const chs = PNL_CHS.map(ch=>({...ch,...calcPNLChannel(ch)}));
+  mk('pnl-bar',{type:'bar',data:{
+    labels:chs.map(c=>c.name.replace(' / ','\n/\n').replace(' (','\n(')),
+    datasets:[{data:chs.map(c=>Math.round(c.net)),backgroundColor:chs.map(c=>c.type==='Club'?C.gold:c.type==='Dist'?C.pine:C.forest),borderRadius:3}]
+  },options:{...baseOpts(v=>'$'+(v/1000).toFixed(0)+'K'),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.raw.toLocaleString()}}}}});
+
+  // Waterfall
+  const totRev=chs.reduce((s,c)=>s+c.rev,0), totFee=chs.reduce((s,c)=>s+c.hondaF,0);
+  const totCuke=chs.reduce((s,c)=>s+c.cukeC,0), totNet=chs.reduce((s,c)=>s+c.net,0);
+  mk('pnl-waterfall',{type:'bar',data:{
+    labels:['Revenue','− Honda Fees','− Cuke Cost','= HF Net'],
+    datasets:[{data:[Math.round(totRev),-Math.round(totFee),-Math.round(totCuke),Math.round(totNet)],
+      backgroundColor:[C.sage,C.red,C.gold,C.forest],borderRadius:4}]
+  },options:{...baseOpts(v=>'$'+(v/1000).toFixed(0)+'K'),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+Math.abs(c.raw).toLocaleString()}}}}});
+}
+
+// ══ RISKS ════════════════════════════════════════════════════════════════
+const RISKS = [
+  {t:"Honda can't scale",sev:'H',l:'MED',c:'rh',d:'If Honda lacks capacity to go 400→3,000 lbs/wk, revenue stalls.',m:'Written capacity milestones in agreement. Identify 1 backup co-packer before signing.'},
+  {t:'Slow retail sell-through',sev:'M',l:'MED',c:'rm',d:'Jars that sit get pulled within 90 days.',m:'Test at 2–3 Foodland stores first. Monitor velocity weekly. Consider in-store demos at launch.'},
+  {t:'Honda raises his fee',sev:'M',l:'LOW',c:'rm',d:'Every $0.10 increase costs ~$23K/yr at Phase 3 volume.',m:'Lock fee for 24 months in writing. Volume discount schedule (fee drops as volume grows).'},
+  {t:'Costco rejects the SKU',sev:'M',l:'LOW',c:'rm',d:'Phase 4 loses $105K/yr. Business still $646K/yr without it.',m:'Approach after 12 months of Safeway/Foodland sell-through data. Use cucumber buyer relationship as intro.'},
+  {t:'Label / regulatory delays',sev:'L',l:'MED',c:'rl',d:'FDA acidified food compliance + UPC registration each take 2–6 weeks.',m:'Start label design Week 2. File UPC Week 1. Allow 10-week lead from agreement to first delivery.'},
+  {t:'Competitor launches first',sev:'L',l:'LOW',c:'rl',d:'Another brand takes the locally-grown dill pickle position.',m:'Move fast — shelf within 90 days. File trademark immediately. No Hawaii dill pickle exists today.'},
+  {t:'Food safety recall',sev:'H',l:'LOW',c:'rh',d:'Incorrect pH in acidified food = serious liability.',m:'Honda must maintain HACCP + FDA acidified food registration. Contract assigns processing liability to Honda.'},
+  {t:'Retail deductions',sev:'M',l:'HIGH',c:'rm',d:'Retailers deduct 1–3% for shorts, damage, late delivery.',m:'Budget 2% deductions. Honda contract must specify delivery standards with financial penalties.'},
+  {t:'Cuke cost rises',sev:'L',l:'LOW',c:'rl',d:'If cost doubles to $0.80/lb, Phase 4 net drops ~$62K — still $689K.',m:'Cucumber cost is only 5–6% of KP revenue at scale. Very low sensitivity.'},
+];
+
+function buildRisks() {
+  const grid = document.getElementById('risk-grid');
+  if(!grid) return;
+  grid.innerHTML = RISKS.map((r,i)=>`<div class="rc ${r.c}" onclick="showRisk(${i})">
+    <div class="rt">${r.t}</div><div class="rs">Severity: ${r.sev==='H'?'High':r.sev==='M'?'Medium':'Low'} · Likelihood: ${r.l}</div></div>`).join('');
+}
+function showRisk(i) {
+  const r=RISKS[i], el=document.getElementById('risk-detail');
+  if(!el) return;
+  const cls=r.c==='rh'?'co-r':r.c==='rm'?'co-o':'co-g';
+  el.className=`co ${cls}`;
+  el.innerHTML=`<strong>${r.t}</strong><br><br>${r.d}<br><br><strong>Mitigation:</strong> ${r.m}`;
+}
+
+// ══ CHECKLIST ════════════════════════════════════════════════════════════
+const CL = {
+  '⚖️ Legal': ['Co-packing agreement signed — fee, term, termination','Brand trademark filed (Keiki Pickles KP)','Liability clause — Honda liable for processing defects','IP ownership — recipes and brand 100% HF','Volume milestone schedule in writing'],
+  '🏛️ Regulatory': ['Honda kitchen licensed for acidified foods','HACCP plan documented','UPC barcodes registered — KP-01 and KP-02','FDA-compliant nutrition facts panel','Shelf life testing — 12 months minimum'],
+  '🎨 Brand': ['Label design — KP-01 Classic Dill','Label design — KP-02 Cucumber Kim Chee','Label print order placed (min 5,000 labels)','Jar and lid sourcing confirmed','Two SKUs: KP-01 (16oz dill) + KP-02 (12oz kimchi)'],
+  '🏪 Sales': ['Foodland buyer meeting scheduled','Safeway Hawaii buyer meeting scheduled','Product sell sheet created (1 page)','Honda delivery routes confirmed'],
+  '🏭 Production': ['KP-01 brine recipe finalized (pH ≤ 4.6)','KP-02 — confirm Honda\'s existing kimchi recipe meets spec','Cucumber size spec for KP grade (3–5 inch)','Weekly cucumber delivery schedule agreed','First test batch produced and tasted'],
+  '💼 Finance': ['Separate P&L tracking for KP','Honda invoice process — weekly, Net-14','2% retail deductions budget set','Working capital reserve — 90 days of Honda fees'],
+};
+function buildChecklist() {
+  const grid = document.getElementById('cl-grid');
+  if(!grid) return;
+  Object.entries(CL).forEach(([cat, items]) => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `<div class="card-head"><h3>${cat}</h3></div><div class="card-body"><ul style="list-style:none">${
+      items.map((item,i)=>`<li class="cl-item" id="cli-${cat.replace(/\W/g,'')}-${i}">
+        <input type="checkbox" id="cb-${cat.replace(/\W/g,'')}-${i}" onchange="updateCL()">
+        <label for="cb-${cat.replace(/\W/g,'')}-${i}"><strong>${item}</strong></label></li>`).join('')
+    }</ul></div>`;
+    grid.appendChild(div);
+  });
+  updateCL();
+}
+function updateCL() {
+  const all=document.querySelectorAll('.cl-item input'), done=document.querySelectorAll('.cl-item input:checked');
+  const pct=Math.round(done.length/all.length*100);
+  const sv=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  sv('cl-pct',pct+'%'); sv('cl-done',done.length); sv('cl-rem',all.length-done.length);
+  const b=document.getElementById('cl-bar'); if(b) b.style.width=pct+'%';
+  all.forEach(cb=>{ cb.closest('.cl-item')?.classList.toggle('done',cb.checked); });
+}
+
+// ══ NAV ══════════════════════════════════════════════════════════════════
+function nav(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tn').forEach(t=>t.classList.remove('on'));
+  document.getElementById('page-'+id)?.classList.add('on');
+  el?.classList.add('on');
+}
+
+function toggleCtrl() {
+  const panel=document.getElementById('ctrl-panel'), chev=document.getElementById('ctrl-chev');
+  panel.classList.toggle('open');
+  if(chev) chev.classList.toggle('open', panel.classList.contains('open'));
+}
+
+// ══ INIT ═════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  readSliders();
+  buildRisks();
+  buildChecklist();
+  go();
+});
+</script>
+</body>
+</html>
