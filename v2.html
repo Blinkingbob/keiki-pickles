@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keiki Pickles — Business Plan</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --text: #d8e8d8; --text-sub: #b0d0b0; --text-muted: #88b888; --text-dim: #5a8a5a;
+  --green: #7dd17a; --yellow: #e0c860; --red: #e06060;
+  --border: #2a4a2a; --bg: #0d1a0d; --panel: #121f12; --panel-dark: #0a100a; --accent: #6aae66;
+  --header-bg: linear-gradient(135deg, #0d1a0d, #162816, #0d1a0d);
+  --slider-track: #243624; --slider-fill: #5a9e55; --slider-thumb: #5a9e55; --slider-thumb-border: #0d1a0d;
+}
+body.light {
+  --text: #3a4a3a; --text-sub: #4a5a4a; --text-muted: #3a6a3a; --text-dim: #6a9a6a;
+  --green: #2a7a28; --yellow: #8a7018; --red: #a03030;
+  --border: #b0c0b0; --bg: #e8eae8; --panel: #f0f2f0; --panel-dark: #dce0dc; --accent: #2a6a28;
+  --header-bg: linear-gradient(135deg, #d8dcd8, #e4e8e4, #d8dcd8);
+  --slider-track: #a0c8a0; --slider-fill: #2a6a28; --slider-thumb: #2a6a28; --slider-thumb-border: #e0e8e0;
+}
+body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; }
+
+.header { background: var(--header-bg); border-bottom: 1px solid var(--border); padding: 22px 32px 18px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
+.header-title { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--text); }
+.header-title em { color: var(--accent); font-style: normal; }
+
+.layout { max-width: 1100px; margin: 0 auto; padding: 20px 32px 80px; display: grid; grid-template-columns: 260px 1fr; gap: 22px; }
+
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+.panel-title { font-size: 9px; letter-spacing: 0.16em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
+
+.btn { background: none; border: 1px solid var(--border); border-radius: 4px; color: var(--text-muted); font-family: inherit; font-size: 10px; padding: 3px 8px; cursor: pointer; }
+.btn:hover { color: var(--text); border-color: var(--accent); }
+
+.slider-group { padding-top: 10px; }
+.slider-header { display: flex; justify-content: space-between; align-items: flex-end; }
+.slider-label { font-size: 10px; letter-spacing: 0.08em; color: var(--text-sub); text-transform: uppercase; line-height: 1; }
+.slider-value { font-size: 14px; color: var(--text); font-weight: 700; white-space: nowrap; line-height: 1; }
+
+input[type=range] { width: 100%; appearance: none; -webkit-appearance: none; height: 3px; border-radius: 2px; outline: none; cursor: pointer; margin-top: 7px; padding: 0; display: block; }
+input[type=range]::-webkit-slider-runnable-track { height: 3px; border-radius: 2px; background: inherit; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--slider-thumb); cursor: pointer; border: 2px solid var(--slider-thumb-border); margin-top: -5px; }
+input[type=range]::-moz-range-track { height: 3px; border-radius: 2px; background: inherit; border: none; }
+input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--slider-thumb); cursor: pointer; border: 2px solid var(--slider-thumb-border); }
+
+.sz-toggle { display: flex; gap: 2px; }
+.szb { padding: 3px 10px; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 10px; color: var(--text-muted); cursor: pointer; background: none; }
+.szb.on { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 14px; }
+.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 7px; padding: 11px 12px; }
+.kpi-label { font-size: 9px; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; text-align: right; }
+.kpi-value { font-size: 17px; font-weight: 700; line-height: 1; color: var(--text); text-align: right; }
+.kpi-sub { font-size: 9px; color: var(--text-dim); margin-top: 4px; text-align: right; }
+
+.fin-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'DM Mono', monospace; }
+.fin-table th { font-size: 9px; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--border); font-weight: 700; }
+.fin-table th:first-child { text-align: left; }
+.fin-table td { text-align: right; padding: 5px 8px; border-bottom: 1px solid rgba(42,74,42,.5); color: var(--text-sub); }
+.fin-table td:first-child { text-align: left; color: var(--text-muted); }
+.fin-table tr.section-header td { color: var(--accent); font-weight: 700; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding-top: 12px; border-bottom: 1px solid var(--border); }
+.fin-table tr.total-row td { color: var(--green); font-weight: 700; border-top: 1px solid var(--border); border-bottom: 2px solid var(--border); }
+.fin-table tr.neg td { color: var(--yellow); }
+.fin-table tr.hl td { color: var(--accent); font-weight: 700; }
+.fin-table tr:hover td { background: rgba(106,174,102,.04); }
+
+.bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.bar-lbl { width: 130px; font-size: 10px; color: var(--text-sub); text-align: right; flex-shrink: 0; }
+.bar-track { flex: 1; background: var(--panel-dark); border-radius: 2px; height: 14px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 2px; display: flex; align-items: center; padding-left: 6px; font-size: 9px; font-weight: 600; color: var(--bg); }
+.bar-end { width: 55px; font-size: 10px; font-weight: 500; color: var(--text); }
+
+.note { font-size: 10px; color: var(--text-muted); line-height: 1.6; padding: 8px 12px; border-left: 2px solid var(--accent); margin: 8px 0; }
+.note.warn { border-left-color: var(--yellow); }
+
+.flow { display: flex; gap: 1px; border-radius: 6px; overflow: hidden; margin: 10px 0; }
+.fb { flex: 1; padding: 10px 4px; text-align: center; background: var(--panel-dark); }
+.fb:first-child { background: rgba(106,174,102,.1); }
+.fb:last-child { background: rgba(106,174,102,.15); }
+.fb.neg { background: rgba(224,96,96,.08); }
+.fb-val { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1; }
+.fb:first-child .fb-val { color: var(--green); }
+.fb.neg .fb-val { color: var(--red); }
+.fb:last-child .fb-val { color: var(--green); }
+.fb-lbl { font-size: 8px; color: var(--text-dim); margin-top: 3px; text-transform: uppercase; letter-spacing: .05em; }
+
+.risk-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.rc { border-radius: 6px; padding: 8px 10px; cursor: pointer; border: 1px solid var(--border); background: var(--panel-dark); }
+.rc:hover { border-color: var(--accent); }
+.rc .rt { font-size: 10px; font-weight: 700; color: var(--text-sub); margin-bottom: 2px; }
+.rc .rs { font-size: 9px; color: var(--text-dim); }
+.rc.rh { border-color: rgba(224,96,96,.3); }
+.rc.rm { border-color: rgba(224,200,96,.3); }
+
+.cl-item { display: flex; gap: 8px; padding: 5px 0; border-bottom: 1px solid rgba(42,74,42,.3); align-items: center; }
+.cl-item:last-child { border-bottom: none; }
+.cl-item input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+.cl-item label { cursor: pointer; font-size: 10px; color: var(--text-sub); }
+.cl-item.done label { text-decoration: line-through; color: var(--text-dim); }
+
+.cw { position: relative; }
+.h180 { height: 180px; }
+.h220 { height: 220px; }
+
+.rev-trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.rev-cell { padding: 10px; border-radius: 6px; text-align: center; background: var(--panel-dark); border: 1px solid var(--border); }
+.rev-v { font-size: 18px; font-weight: 700; line-height: 1; }
+.rev-l { font-size: 8px; text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; color: var(--text-dim); }
+.rc-g .rev-v { color: var(--green); }
+.rc-r .rev-v { color: var(--red); }
+.rc-n .rev-v { color: var(--accent); }
+
+.stepper { display: flex; gap: 2px; margin-bottom: 10px; }
+.step { flex: 1; padding: 8px 6px; text-align: center; cursor: pointer; border: 1px solid var(--border); border-radius: 6px; background: var(--panel-dark); font-size: 10px; color: var(--text-muted); }
+.step:hover { border-color: var(--accent); }
+.step.on { border-color: var(--accent); color: var(--accent); }
+.step strong { display: block; font-size: 13px; margin-bottom: 2px; color: var(--text); }
+.step.on strong { color: var(--green); }
+
+.prog { height: 3px; background: var(--panel-dark); border-radius: 2px; overflow: hidden; margin: 6px 0 10px; }
+.prog-f { height: 100%; background: var(--accent); border-radius: 2px; transition: width .3s; }
+
+@media (max-width: 720px) { .layout { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-title">Keiki Pickles <em>Business Plan</em></div>
+    <div style="display:flex;align-items:baseline;gap:14px">
+      <div class="sz-toggle">
+        <button class="szb on" onclick="setSize(16,this)">16oz</button>
+        <button class="szb" onclick="setSize(12,this)">12oz</button>
+      </div>
+      <button onclick="resetAll()" class="btn">reset</button>
+      <button onclick="toggleTheme()" class="btn" id="themeToggle">light</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="panel">
+    <div class="panel-title">Volume</div>
+    <div class="slider-group">
+      <div class="slider-header">
+        <div class="slider-label">KP lbs / week</div>
+        <span class="slider-value" id="gv-lbs">400</span>
+      </div>
+      <input type="range" id="g-lbs" min="400" max="3000" step="50" value="400" style="background:linear-gradient(to right,var(--slider-fill) 0%,var(--slider-track) 0%)" oninput="go()">
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Our Costs</div>
+    <div class="slider-group">
+      <div class="slider-header">
+        <div class="slider-label">Honda fee — 16oz</div>
+        <span class="slider-value" id="gv-f16">$1.40</span>
+      </div>
+      <input type="range" id="g-f16" min="0.50" max="3.00" step="0.10" value="1.40" style="background:linear-gradient(to right,var(--slider-fill) 36%,var(--slider-track) 36%)" oninput="go()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-header">
+        <div class="slider-label">Honda fee — 12oz</div>
+        <span class="slider-value" id="gv-f12">$1.20</span>
+      </div>
+      <input type="range" id="g-f12" min="0.50" max="2.50" step="0.10" value="1.20" style="background:linear-gradient(to right,var(--slider-fill) 35%,var(--slider-track) 35%)" oninput="go()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-header">
+        <div class="slider-label">Cuke cost / lb</div>
+        <span class="slider-value" id="gv-ccost">$0.40</span>
+      </div>
+      <input type="range" id="g-ccost" min="0.10" max="1.50" step="0.05" value="0.40" style="background:linear-gradient(to right,var(--slider-fill) 21%,var(--slider-track) 21%)" oninput="go()">
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Wholesale Prices</div>
+    <div class="slider-group">
+      <div class="slider-header">
+        <div class="slider-label">Retail 16oz</div>
+        <span class="slider-value" id="gv-p16">$4.33</span>
+      </div>
+      <input type="range" id="g-p16" min="2.50" max="7.00" step="0.25" value="4.33" style="background:linear-gradient(to right,var(--slider-fill) 41%,var(--slider-track) 41%)" oninput="go()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-header">
+        <div class="slider-label">Retail 12oz</div>
+        <span class="slider-value" id="gv-p12">$4.33</span>
+      </div>
+      <input type="range" id="g-p12" min="2.00" max="6.00" step="0.25" value="4.33" style="background:linear-gradient(to right,var(--slider-fill) 58%,var(--slider-track) 58%)" oninput="go()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-header">
+        <div class="slider-label">Costco 32oz</div>
+        <span class="slider-value" id="gv-p32c">$8.75</span>
+      </div>
+      <input type="range" id="g-p32c" min="5.00" max="15.00" step="0.25" value="8.75" style="background:linear-gradient(to right,var(--slider-fill) 38%,var(--slider-track) 38%)" oninput="go()">
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Retailer</div>
+    <div class="slider-group">
+      <div class="slider-header">
+        <div class="slider-label">Markup %</div>
+        <span class="slider-value" id="gv-mu">50%</span>
+      </div>
+      <input type="range" id="g-mu" min="20" max="80" step="5" value="50" style="background:linear-gradient(to right,var(--slider-fill) 50%,var(--slider-track) 50%)" oninput="go()">
+    </div>
+  </div>
+  <input type="hidden" id="g-pdist" value="4.00">
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- KPIs -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Jars / lb</div><div class="kpi-value" id="ov-jpl">1.67x</div><div class="kpi-sub" id="ov-jpl-s">16oz · 60% cuke</div></div>
+    <div class="kpi"><div class="kpi-label">Shelf price</div><div class="kpi-value" id="ov-shelf">$6.50</div><div class="kpi-sub" id="ov-shelf-s">50% markup</div></div>
+    <div class="kpi"><div class="kpi-label">HF net / jar</div><div class="kpi-value" style="color:var(--green)" id="ov-net-jar">$2.65</div><div class="kpi-sub" id="ov-net-s">61% margin</div></div>
+    <div class="kpi"><div class="kpi-label">HF net / lb</div><div class="kpi-value" style="color:var(--yellow)" id="ov-net-lb">$4.42</div><div class="kpi-sub">vs $0.40 cost</div></div>
+  </div>
+
+  <!-- Per-Jar Flow -->
+  <div class="panel">
+    <div class="panel-title">Per-Jar Flow <span style="color:var(--text-dim)" id="ov-flow-oz">16oz</span></div>
+    <div class="flow" id="ov-flow"></div>
+    <div class="note" id="ov-note"></div>
+  </div>
+
+  <!-- Revenue & Costs -->
+  <div class="panel">
+    <div class="panel-title">Revenue &amp; Costs</div>
+    <div class="rev-trio">
+      <div class="rev-cell rc-g"><div class="rev-v" id="rc-gross">$4.33</div><div class="rev-l">Gross / jar</div></div>
+      <div class="rev-cell rc-r"><div class="rev-v" id="rc-costs">$1.68</div><div class="rev-l">Costs / jar</div></div>
+      <div class="rev-cell rc-n"><div class="rev-v" id="rc-net">$2.65</div><div class="rev-l">Net / jar</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="background:var(--panel-dark);border:1px solid var(--border);border-radius:6px;padding:10px">
+        <div style="font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Weekly · <span id="rc-lbs-wk">400</span> lbs · <span style="color:var(--green)" id="rc-jars-wk">667</span> jars</div>
+        <table class="fin-table"><tbody>
+          <tr><td>Gross</td><td id="rc-gross-wk">$2.9K</td></tr>
+          <tr><td>Costs</td><td id="rc-costs-wk" style="color:var(--red)">-$1.1K</td></tr>
+          <tr class="total-row"><td>HF net</td><td id="rc-net-wk">$1.8K</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:var(--panel-dark);border:1px solid var(--border);border-radius:6px;padding:10px">
+        <div style="font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Annual · <span style="color:var(--green)" id="rc-jars-ann">34,684</span> jars</div>
+        <table class="fin-table"><tbody>
+          <tr><td>Gross</td><td id="rc-gross-ann">$149K</td></tr>
+          <tr><td>Costs</td><td id="rc-costs-ann" style="color:var(--red)">-$57K</td></tr>
+          <tr class="total-row"><td>HF net</td><td id="rc-net-ann">$92K</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost Breakdown -->
+  <div class="panel">
+    <div class="panel-title">Cost per Jar</div>
+    <div style="overflow-x:auto">
+    <table class="fin-table">
+      <thead><tr><th>Item</th><th>$ / jar</th><th>% rev</th></tr></thead>
+      <tbody>
+        <tr><td>Honda fee</td><td id="ec-fee">$1.40</td><td id="ec-fee-pct">32%</td></tr>
+        <tr><td>Cucumber cost</td><td id="ec-cuke-cost">$0.24</td><td id="ec-cuke-pct">6%</td></tr>
+        <tr><td>Brine</td><td id="ec-brine-cost">$0.04</td><td id="ec-brine-pct">1%</td></tr>
+        <tr><td>Total costs</td><td id="ec-total-cost">$1.68</td><td id="ec-total-pct">39%</td></tr>
+        <tr><td>HF wholesale</td><td id="ec-ws">$4.33</td><td>100%</td></tr>
+        <tr class="total-row"><td>HF net profit</td><td id="ec-net-jar">$2.65</td><td id="ec-net-pct">61%</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="cw h180" style="margin-top:10px"><canvas id="ec-donut"></canvas></div>
+  </div>
+
+
+  <!-- Shelf Data -->
+  <div class="panel">
+    <div class="panel-title">Shelf Data — In-Store March 2026</div>
+    <div style="overflow-x:auto">
+    <table class="fin-table">
+      <thead><tr><th>Brand</th><th>Product</th><th>Origin</th><th>Size</th><th>Price</th><th>$/oz</th></tr></thead>
+      <tbody>
+        <tr><td>Yeong Suks</td><td>Spicy Takuwan</td><td>Local</td><td>12oz</td><td>$8.99</td><td>$0.75</td></tr>
+        <tr><td>Halm's</td><td>Cucumber Kim Chee</td><td>Local</td><td>10oz</td><td>$7.99</td><td>$0.80</td></tr>
+        <tr><td>A-1</td><td>Cucumber Kim Chee</td><td>Local</td><td>10oz</td><td>$7.49</td><td>$0.75</td></tr>
+        <tr><td>Del Monte</td><td>Sweet Whole Pickles</td><td>Mainland</td><td>22oz</td><td>$8.99</td><td>$0.41</td></tr>
+        <tr><td>Majestic</td><td>Kosher Baby Dills</td><td>Mainland</td><td>24oz</td><td>$5.49</td><td>$0.23</td></tr>
+        <tr><td>Mt. Olive</td><td>Hamburger Dill Chips</td><td>Mainland</td><td>16oz</td><td>$5.49</td><td>$0.34</td></tr>
+        <tr class="hl"><td>KP-01</td><td>Classic Dill</td><td>Local</td><td>16oz</td><td id="cp-kp01-retail">$6.50</td><td id="cp-kp01-ppoz">$0.41</td></tr>
+        <tr class="hl"><td>KP-02</td><td>Kim Chee</td><td>Local</td><td>12oz</td><td id="cp-kp02-retail">$6.50</td><td id="cp-kp02-ppoz">$0.54</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Growth Plan -->
+  <div class="panel">
+    <div class="panel-title">Growth Plan</div>
+    <div class="stepper">
+      <div class="step on" onclick="showPhase(0,this)"><strong>P1</strong>400 lbs · M1-3</div>
+      <div class="step"    onclick="showPhase(1,this)"><strong>P2</strong>825 lbs · M4-9</div>
+      <div class="step"    onclick="showPhase(2,this)"><strong>P3</strong>1,750 lbs · M10-18</div>
+      <div class="step"    onclick="showPhase(3,this)"><strong>P4</strong>3,000 lbs · M18+</div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="fin-table">
+      <thead><tr><th>Metric</th><th>Phase 1</th><th>Phase 2</th><th>Phase 3</th><th>Phase 4</th></tr></thead>
+      <tbody id="phases-compare"></tbody>
+    </table>
+    </div>
+    <div class="cw h220" style="margin-top:10px"><canvas id="phase-chart"></canvas></div>
+  </div>
+
+
+
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+// ══ THEME ════════════════════════════════════════════════════════════════
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  const isLight = document.body.classList.contains('light');
+  document.getElementById('themeToggle').textContent = isLight ? 'dark' : 'light';
+  localStorage.setItem('kp-theme', isLight ? 'light' : 'dark');
+  // Update slider backgrounds
+  document.querySelectorAll('input[type=range]').forEach(updateSliderBg);
+  if (Object.keys(charts).length) updateAllCharts();
+}
+if (localStorage.getItem('kp-theme') === 'light') {
+  document.body.classList.add('light');
+  document.getElementById('themeToggle').textContent = 'dark';
+}
+
+function sliderBg(el) {
+  const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+  const s = getComputedStyle(document.documentElement);
+  return `linear-gradient(to right,${s.getPropertyValue('--slider-fill').trim()} ${pct}%,${s.getPropertyValue('--slider-track').trim()} ${pct}%)`;
+}
+function updateSliderBg(el) { el.style.background = sliderBg(el); }
+
+// ══ STATE ════════════════════════════════════════════════════════════════
+const fw = v => { const a=Math.abs(v); return a>=1000?'$'+(a/1000).toFixed(1)+'K':'$'+a.toFixed(0); };
+const DEF = { lbs:400, p16:4.33, p12:4.33, pdist:4.00, p32c:8.75, f16:1.40, f12:1.20, ccost:0.40, mu:50 };
+let G = {...DEF};
+let JAR = 16;
+let charts = {};
+let activePhase = 0;
+
+const C = { green:'#7dd17a', pine:'#5a9e55', accent:'#6aae66', yellow:'#e0c860', red:'#e06060', stone:'#88b888', dark:'#0a100a' };
+
+// ══ JAR MATH ═════════════════════════════════════════════════════════════
+function cukePerJar(oz) { return (oz / 16) * 0.60; }
+function jplOz(oz) { return 1 / cukePerJar(oz); }
+function brine(oz) { return 0.04 * oz / 16; }
+function ws() { return JAR === 12 ? G.p12 : G.p16; }
+function fee() { return JAR === 12 ? G.f12 : G.f16; }
+function cpj() { return cukePerJar(JAR); }
+function netJar(wsP, feeA, oz) { return wsP - feeA - cukePerJar(oz)*G.ccost - brine(oz); }
+function netLb(wsP, feeA, oz) { return netJar(wsP, feeA, oz) * jplOz(oz); }
+function shelf(wsP) { return wsP * (1 + G.mu/100); }
+function f$(v) { return v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1e3?'$'+(v/1e3).toFixed(0)+'K':'$'+v.toFixed(0); }
+function fp(v, d=2) { return '$'+v.toFixed(d); }
+
+// ══ SLIDERS ══════════════════════════════════════════════════════════════
+function readSliders() {
+  G = {
+    lbs: +document.getElementById('g-lbs').value,
+    p16: +document.getElementById('g-p16').value,
+    p12: +document.getElementById('g-p12').value,
+    pdist: +document.getElementById('g-pdist').value,
+    p32c: +document.getElementById('g-p32c').value,
+    f16: +document.getElementById('g-f16').value,
+    f12: +document.getElementById('g-f12').value,
+    ccost: +document.getElementById('g-ccost').value,
+    mu: +document.getElementById('g-mu').value,
+  };
+}
+
+function go() {
+  readSliders();
+  document.querySelectorAll('input[type=range]').forEach(updateSliderBg);
+  const sv = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+  sv('gv-lbs', Math.round(G.lbs).toLocaleString());
+  sv('gv-p16', fp(G.p16)); sv('gv-p12', fp(G.p12)); sv('gv-p32c', fp(G.p32c));
+  sv('gv-f16', fp(G.f16)); sv('gv-f12', fp(G.f12)); sv('gv-ccost', fp(G.ccost));
+  sv('gv-mu', G.mu+'%');
+  updateAll();
+}
+
+function setSize(oz, el) {
+  JAR = oz;
+  document.querySelectorAll('.szb').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  go();
+}
+
+function resetAll() {
+  Object.entries(DEF).forEach(([k,v]) => { const e=document.getElementById('g-'+k); if(e) e.value=v; });
+  go();
+}
+
+// ══ UPDATE ALL ═══════════════════════════════════════════════════════════
+function updateAll() {
+  const oz=JAR, wsA=ws(), feeA=fee();
+  const jplV=jplOz(oz), netJ=netJar(wsA,feeA,oz), nlb=netLb(wsA,feeA,oz);
+  const shelfP=shelf(wsA), cpjV=cukePerJar(oz), brineV=brine(oz);
+  const totalCost=feeA+cpjV*G.ccost+brineV;
+  const jarsWk=G.lbs*jplV;
+  const grossWk=jarsWk*wsA, costsWk=jarsWk*totalCost, netWk=jarsWk*netJ;
+
+  const sv = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+
+  // KPIs
+  sv('ov-jpl', jplV.toFixed(2)+'x'); sv('ov-jpl-s', oz+'oz · 60% cuke');
+  sv('ov-shelf', fp(shelfP)); sv('ov-shelf-s', G.mu+'% markup');
+  sv('ov-net-jar', fp(netJ)); sv('ov-net-s', Math.round(netJ/wsA*100)+'% margin');
+  sv('ov-net-lb', fp(nlb)); sv('ov-flow-oz', oz+'oz');
+
+  // Flow
+  const fl = document.getElementById('ov-flow');
+  if(fl) fl.innerHTML = [
+    {v:fp(wsA), l:'HF collects', cls:''},
+    {v:'-'+fp(feeA), l:'Honda fee', cls:'neg'},
+    {v:'-'+fp(cpjV*G.ccost), l:'Cuke', cls:'neg'},
+    {v:'-'+fp(brineV), l:'Brine', cls:'neg'},
+    {v:fp(netJ), l:'HF net', cls:''},
+  ].map(f=>`<div class="fb ${f.cls}"><div class="fb-val">${f.v}</div><div class="fb-lbl">${f.l}</div></div>`).join('');
+
+  sv('ov-note', `At $${wsA.toFixed(2)} wholesale, HF nets ${fp(netJ)}/jar and ${fp(nlb)}/lb. ${jplV.toFixed(2)} jars from every pound.`);
+
+  // Rev & costs
+  sv('rc-gross', fp(wsA)); sv('rc-costs', fp(totalCost)); sv('rc-net', fp(netJ));
+  sv('rc-lbs-wk', Math.round(G.lbs).toLocaleString());
+  sv('rc-jars-wk', Math.round(jarsWk).toLocaleString());
+  sv('rc-jars-ann', Math.round(jarsWk*52).toLocaleString());
+  sv('rc-gross-wk', fw(grossWk)); sv('rc-costs-wk', '-'+fw(costsWk)); sv('rc-net-wk', fw(netWk));
+  sv('rc-gross-ann', fw(grossWk*52)); sv('rc-costs-ann', '-'+fw(costsWk*52)); sv('rc-net-ann', fw(netWk*52));
+
+  // Cost table
+  sv('ec-fee', fp(feeA)); sv('ec-fee-pct', Math.round(feeA/wsA*100)+'%');
+  sv('ec-cuke-cost', fp(cpjV*G.ccost)); sv('ec-cuke-pct', Math.round(cpjV*G.ccost/wsA*100)+'%');
+  sv('ec-brine-cost', fp(brineV,3)); sv('ec-brine-pct', Math.round(brineV/wsA*100)+'%');
+  sv('ec-total-cost', fp(totalCost)); sv('ec-total-pct', Math.round(totalCost/wsA*100)+'%');
+  sv('ec-ws', fp(wsA)); sv('ec-net-jar', fp(netJ)); sv('ec-net-pct', Math.round(netJ/wsA*100)+'%');
+
+  // Competitive
+  const kp01shelf=shelf(G.p16), kp02shelf=shelf(G.p12);
+  sv('cp-kp01-retail', fp(kp01shelf)); sv('cp-kp01-ppoz', fp(kp01shelf/16,2));
+  sv('cp-kp02-retail', fp(kp02shelf)); sv('cp-kp02-ppoz', fp(kp02shelf/12,2));
+
+  const comps = [
+    {l:'Sig Select 16oz', v:0.281, c:C.stone},
+    {l:'Majestic 24oz', v:0.313, c:C.stone},
+    {l:'Mt. Olive 16oz', v:0.343, c:C.stone},
+    {l:'Del Monte 22oz', v:0.409, c:C.stone},
+    {l:'KP-01 Dill 16oz', v:kp01shelf/16, c:C.green},
+    {l:'KP-02 Kimchi 12oz', v:kp02shelf/12, c:C.pine},
+    {l:"Halm's Foodland", v:0.599, c:C.accent},
+    {l:"A-1 Cucumber", v:0.749, c:C.accent},
+    {l:"Halm's", v:0.799, c:C.accent},
+  ].sort((a,b)=>a.v-b.v);
+  const maxV=Math.max(...comps.map(c=>c.v));
+  const barEl=document.getElementById('cp-bars');
+  if(barEl) barEl.innerHTML=comps.map(c=>`<div class="bar-row">
+    <div class="bar-lbl">${c.l}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${(c.v/maxV*100).toFixed(0)}%;background:${c.c}">${fp(c.v,2)}</div></div>
+    <div class="bar-end">${fp(c.v,2)}/oz</div>
+  </div>`).join('');
+
+  // Phases
+  updatePhases();
+  updatePNL();
+  updateAllCharts();
+}
+
+// ══ PHASES ═══════════════════════════════════════════════════════════════
+const PH = [
+  {lbs:400,  period:'M1-3',  ch:'Foodland · Safeway · KTA', note:'Start at Honda\'s existing 400 lbs/week.'},
+  {lbs:825,  period:'M4-9',  ch:'+ Walmart + Armstrong + Hilo', note:'Unlock distributor relationships.'},
+  {lbs:1750, period:'M10-18',ch:"+ Sam's Club 32oz", note:"Sam's buys 2,397 lbs/wk of our cukes."},
+  {lbs:3000, period:'M18+',  ch:'+ Costco Hawaii all 7 stores', note:'Costco: 21,062 lbs/wk customer.'},
+];
+const PH_MIX = [
+  {r:1.00,d:0.00,s:0.00,co:0.00},
+  {r:0.60,d:0.40,s:0.00,co:0.00},
+  {r:0.42,d:0.38,s:0.10,co:0.10},
+  {r:0.30,d:0.25,s:0.10,co:0.35},
+];
+function calcPhase(i) {
+  const m=PH_MIX[i], lbs=PH[i].lbs;
+  const j16=(lbs*m.r+lbs*m.d)*jplOz(JAR), j32s=lbs*m.s*jplOz(32), j32c=lbs*m.co*jplOz(32);
+  const rev=(lbs*m.r)*jplOz(JAR)*ws()+(lbs*m.d)*jplOz(JAR)*G.pdist+j32s*G.p32c*0.94+j32c*G.p32c;
+  const hondaFee=j16*fee()+(j32s+j32c)*1.80;
+  const cuke=lbs*G.ccost;
+  return {rev,hondaFee,cuke,net:rev-hondaFee-cuke,jars:j16+j32s+j32c};
+}
+function showPhase(i, el) {
+  activePhase=i;
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('on'));
+  el.classList.add('on');
+}
+function updatePhases() {
+  const all=PH.map((_,i)=>calcPhase(i));
+  const rows = [
+    ['Period', PH.map(p=>p.period)],
+    ['lbs/week', PH.map(p=>p.lbs.toLocaleString())],
+    ['Jars/week', all.map(p=>'~'+Math.round(p.jars).toLocaleString())],
+    ['Annual revenue', all.map(p=>f$(p.rev*52))],
+    ['Honda fees/yr', all.map(p=>f$(p.hondaFee*52))],
+    ['Cuke cost/yr', all.map(p=>f$(p.cuke*52))],
+    ['HF net/yr', all.map(p=>f$(p.net*52))],
+    ['Net margin', all.map(p=>Math.round(p.net/p.rev*100)+'%')],
+  ];
+  const tbody=document.getElementById('phases-compare');
+  if(tbody) tbody.innerHTML=rows.map((r,i)=>
+    `<tr${i===6?' class="total-row"':''}><td>${r[0]}</td>${r[1].map(v=>`<td>${v}</td>`).join('')}</tr>`
+  ).join('');
+}
+
+// ══ P&L ══════════════════════════════════════════════════════════════════
+const PNL_CHS = [
+  {name:'Foodland / Safeway / KTA', lbs:900,  is32:false, fn:g=>g.p16,      type:'Retail'},
+  {name:'Armstrong Produce',        lbs:450,  is32:false, fn:g=>g.pdist,     type:'Dist'},
+  {name:'Costco Hawaii (32oz)',      lbs:375,  is32:true,  fn:g=>g.p32c,      type:'Club'},
+  {name:'Hilo Products',            lbs:375,  is32:false, fn:g=>g.pdist,     type:'Dist'},
+  {name:'Walmart / Honaunau',       lbs:350,  is32:false, fn:g=>g.p16*0.92,  type:'Retail'},
+  {name:"Sam's Club (32oz)",        lbs:300,  is32:true,  fn:g=>g.p32c*0.94, type:'Club'},
+  {name:'D. Otani / Farm Link',     lbs:250,  is32:false, fn:g=>g.pdist,     type:'Dist'},
+];
+function calcPNLChannel(ch) {
+  const wsP=ch.fn(G), feeP=ch.is32?1.80:fee();
+  const jplV=ch.is32?jplOz(32):jplOz(JAR), jars=ch.lbs*jplV;
+  const rev=jars*wsP*52, hondaF=jars*feeP*52, cukeC=ch.lbs*G.ccost*52;
+  return {wsP,jars,rev,hondaF,cukeC,net:rev-hondaF-cukeC};
+}
+function updatePNL() {
+  const chs=PNL_CHS.map(ch=>({...ch,...calcPNLChannel(ch)}));
+  const totRev=chs.reduce((s,c)=>s+c.rev,0), totFee=chs.reduce((s,c)=>s+c.hondaF,0);
+  const totCuke=chs.reduce((s,c)=>s+c.cukeC,0), totNet=chs.reduce((s,c)=>s+c.net,0);
+  const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  sv('pnl-rev',f$(totRev)); sv('pnl-honda',f$(totFee)); sv('pnl-cuke',f$(totCuke));
+  sv('pnl-net',f$(totNet)); sv('pnl-margin',Math.round(totNet/totRev*100)+'%');
+  const tbody=document.getElementById('pnl-tbody');
+  if(tbody) tbody.innerHTML=chs.map(c=>
+    `<tr><td>${c.name}</td><td>${c.type}</td><td>${c.lbs}</td><td>${fp(c.wsP)}</td><td>${f$(c.rev)}</td><td style="color:var(--red)">${f$(c.hondaF)}</td><td style="color:var(--yellow)">${f$(c.cukeC)}</td><td style="color:var(--green)">${f$(c.net)}</td></tr>`
+  ).join('')+`<tr class="total-row"><td colspan="4">Total</td><td>${f$(totRev)}</td><td>${f$(totFee)}</td><td>${f$(totCuke)}</td><td>${f$(totNet)}</td></tr>`;
+}
+
+// ══ CHARTS ═══════════════════════════════════════════════════════════════
+function getChartColors() {
+  const s = getComputedStyle(document.documentElement);
+  return {
+    grid: s.getPropertyValue('--border').trim(),
+    text: s.getPropertyValue('--text-muted').trim(),
+  };
+}
+function mk(id, cfg) {
+  if(charts[id]) charts[id].destroy();
+  const el=document.getElementById(id);
+  if(!el) return;
+  return charts[id]=new Chart(el, cfg);
+}
+function updateAllCharts() {
+  const cc = getChartColors();
+  const oz=JAR, wsA=ws(), feeA=fee();
+  const netJ=netJar(wsA,feeA,oz), cpjV=cukePerJar(oz), brineV=brine(oz);
+
+  mk('ec-donut',{type:'doughnut',data:{
+    labels:['HF Net','Honda Fee','Cucumber','Brine'],
+    datasets:[{data:[+netJ.toFixed(2),feeA,+(cpjV*G.ccost).toFixed(2),brineV],
+      backgroundColor:[C.green,C.red,C.yellow,C.accent],borderWidth:2,borderColor:getComputedStyle(document.documentElement).getPropertyValue('--panel').trim()}]
+  },options:{responsive:true,maintainAspectRatio:false,cutout:'55%',
+    plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10,family:'DM Mono'},color:cc.text,boxWidth:10}},
+    tooltip:{callbacks:{label:c=>'$'+c.raw.toFixed(2)}}}}});
+
+  const phNets=PH.map((_,i)=>Math.round(calcPhase(i).net*52));
+  mk('phase-chart',{type:'bar',data:{
+    labels:['P1','P2','P3','P4'],
+    datasets:[{data:phNets,backgroundColor:[C.green,C.pine,C.accent,C.yellow],borderRadius:3}]
+  },options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.raw.toLocaleString()}}},
+    scales:{x:{grid:{display:false},ticks:{color:cc.text,font:{size:10,family:'DM Mono'}}},
+            y:{grid:{color:cc.grid},ticks:{color:cc.text,font:{size:10,family:'DM Mono'},callback:v=>'$'+(v/1000).toFixed(0)+'K'}}}}});
+
+  const chs=PNL_CHS.map(ch=>({...ch,...calcPNLChannel(ch)}));
+  mk('pnl-bar',{type:'bar',data:{
+    labels:chs.map(c=>c.name.split(' / ')[0].split(' (')[0]),
+    datasets:[{data:chs.map(c=>Math.round(c.net)),backgroundColor:chs.map(c=>c.type==='Club'?C.yellow:c.type==='Dist'?C.pine:C.green),borderRadius:3}]
+  },options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.raw.toLocaleString()}}},
+    scales:{x:{grid:{display:false},ticks:{color:cc.text,font:{size:9,family:'DM Mono'}}},
+            y:{grid:{color:cc.grid},ticks:{color:cc.text,font:{size:10,family:'DM Mono'},callback:v=>'$'+(v/1000).toFixed(0)+'K'}}}}});
+}
+
+// ══ RISKS ════════════════════════════════════════════════════════════════
+const RISKS = [
+  {t:"Honda can't scale",s:'H',c:'rh',d:'If Honda lacks capacity for 400->3,000 lbs/wk, revenue stalls.',m:'Written capacity milestones. Identify backup co-packer.'},
+  {t:'Slow sell-through',s:'M',c:'rm',d:'Jars that sit get pulled within 90 days.',m:'Test 2-3 Foodland stores first. Monitor velocity weekly.'},
+  {t:'Honda raises fee',s:'M',c:'rm',d:'Every $0.10 increase costs ~$23K/yr at Phase 3.',m:'Lock fee for 24 months. Volume discount schedule.'},
+  {t:'Costco rejects SKU',s:'M',c:'rm',d:'Phase 4 loses $105K/yr. Still $646K/yr without it.',m:'Approach after 12 months of sell-through data.'},
+  {t:'Regulatory delays',s:'L',c:'',d:'FDA compliance + UPC: 2-6 weeks each.',m:'Start label design Week 2. File UPC Week 1.'},
+  {t:'Food safety recall',s:'H',c:'rh',d:'Incorrect pH = serious liability.',m:'Honda must maintain HACCP + FDA registration.'},
+  {t:'Retail deductions',s:'M',c:'rm',d:'Retailers deduct 1-3% for shorts/damage.',m:'Budget 2% deductions in P&L.'},
+  {t:'Cuke cost doubles',s:'L',c:'',d:'At $0.80/lb, net drops ~$62K — still $689K.',m:'Only 5-6% of revenue. Very low sensitivity.'},
+  {t:'Competitor first',s:'L',c:'',d:'Another brand takes locally-grown dill position.',m:'Move fast — shelf within 90 days. File trademark.'},
+];
+function buildRisks() {
+  const grid=document.getElementById('risk-grid');
+  if(!grid) return;
+  grid.innerHTML=RISKS.map((r,i)=>`<div class="rc ${r.c}" onclick="showRisk(${i})">
+    <div class="rt">${r.t}</div><div class="rs">${r.s==='H'?'High':r.s==='M'?'Med':'Low'} risk</div></div>`).join('');
+}
+function showRisk(i) {
+  const r=RISKS[i], el=document.getElementById('risk-detail');
+  if(!el) return;
+  el.className = r.c==='rh'?'note warn':'note';
+  el.innerHTML=`<strong>${r.t}</strong> — ${r.d}<br><br><strong>Mitigation:</strong> ${r.m}`;
+}
+
+// ══ CHECKLIST ════════════════════════════════════════════════════════════
+const CL = {
+  'Legal':['Co-packing agreement signed','Brand trademark filed','Liability clause — Honda liable for processing','IP ownership — recipes & brand 100% HF','Volume milestone schedule in writing'],
+  'Regulatory':['Honda kitchen licensed for acidified foods','HACCP plan documented','UPC barcodes registered','FDA nutrition facts panel','Shelf life testing — 12mo min'],
+  'Brand':['Label design — KP-01 Dill','Label design — KP-02 Kim Chee','Labels printed (min 5,000)','Jar & lid sourcing confirmed'],
+  'Sales':['Foodland buyer meeting','Safeway buyer meeting','Sell sheet created','Honda delivery routes confirmed'],
+  'Production':['Brine recipe finalized (pH <= 4.6)','KP-02 kimchi recipe confirmed','Cucumber size spec (3-5 in)','Weekly delivery schedule agreed','First test batch tasted'],
+  'Finance':['Separate P&L tracking','Honda invoice process — Net-14','2% deductions budgeted','90-day working capital reserve'],
+};
+function buildChecklist() {
+  const grid=document.getElementById('cl-grid');
+  if(!grid) return;
+  let html='';
+  Object.entries(CL).forEach(([cat,items])=>{
+    html+=`<div style="font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin:8px 0 4px;font-weight:700">${cat}</div>`;
+    items.forEach((item,i)=>{
+      const id=`cb-${cat.replace(/\W/g,'')}-${i}`;
+      html+=`<div class="cl-item"><input type="checkbox" id="${id}" onchange="updateCL()"><label for="${id}">${item}</label></div>`;
+    });
+  });
+  grid.innerHTML=html;
+  updateCL();
+}
+function updateCL() {
+  const all=document.querySelectorAll('.cl-item input'), done=document.querySelectorAll('.cl-item input:checked');
+  const pct=all.length?Math.round(done.length/all.length*100):0;
+  const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  sv('cl-pct-display', pct+'% ('+done.length+'/'+all.length+')');
+  const b=document.getElementById('cl-bar'); if(b) b.style.width=pct+'%';
+  all.forEach(cb=>cb.closest('.cl-item')?.classList.toggle('done',cb.checked));
+}
+
+// ══ INIT ═════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  readSliders();
+  buildRisks();
+  buildChecklist();
+  go();
+});
+</script>
+</body>
+</html>
